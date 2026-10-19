@@ -13,7 +13,38 @@ well-planned delivery trips.
 - Database: MySQL
 
 ## Setup
-Coming soon.
+
+### Prerequisites
+- JDK 25 (with `JAVA_HOME` pointing to it)
+- Node.js 24 or newer
+- MySQL 8.4 LTS or newer (developed on MySQL 9.7)
+- Git
+
+### 1. Create the database
+Log in to MySQL as root and run:
+
+```sql
+CREATE DATABASE agritech_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'your_user'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON agritech_db.* TO 'your_user'@'localhost';
+```
+
+### 2. Run the backend (port 8080)
+```bash
+cd backend
+copy .env.example .env      # then put your MySQL user and password in .env
+mvnw spring-boot:run        # Windows; use ./mvnw on macOS/Linux
+```
+
+### 3. Run the frontend (port 5173)
+```bash
+cd frontend
+copy .env.example .env
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 in your browser.
 
 ## Author
 Ashmi Hettige
