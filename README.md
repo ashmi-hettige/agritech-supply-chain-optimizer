@@ -46,5 +46,11 @@ npm run dev
 
 Open http://localhost:5173 in your browser.
 
+## Database design
+
+The schema has 12 tables. 
+
+![Entity Relationship Diagram](docs/erd.png)
+
 ## Author
 Ashmi Hettige
