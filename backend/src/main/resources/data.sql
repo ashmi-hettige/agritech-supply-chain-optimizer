@@ -20,3 +20,39 @@ INSERT IGNORE INTO collection_centres (name, district, latitude, longitude) VALU
 ('Thambuttegama Economic Centre',          'Anuradhapura', 8.1545, 80.2980),
 ('Keppetipola Economic Centre',            'Badulla',      6.8981, 80.8760),
 ('Veyangoda Economic Centre',              'Gampaha',      7.1566, 80.0959);
+
+-- 30 days of sample prices for every crop at every centre (8 x 6 x 30 = 1,440 rows).
+-- A sine wave gives realistic day-to-day movement; each centre is a little higher or lower.
+-- New days are added on each startup; existing days are skipped by the unique key.
+INSERT IGNORE INTO market_prices (crop_id, centre_id, price_date, min_price, max_price, avg_price)
+WITH RECURSIVE days AS (
+    SELECT 0 AS d
+    UNION ALL
+    SELECT d + 1 FROM days WHERE d < 29
+),
+priced AS (
+    SELECT c.id AS crop_id,
+           cc.id AS centre_id,
+           days.d,
+           (CASE c.name
+                WHEN 'Carrot'   THEN 220
+                WHEN 'Beans'    THEN 300
+                WHEN 'Tomato'   THEN 180
+                WHEN 'Leeks'    THEN 200
+                WHEN 'Cabbage'  THEN 120
+                WHEN 'Potato'   THEN 250
+                WHEN 'Capsicum' THEN 350
+                WHEN 'Beetroot' THEN 200
+                ELSE 200
+            END) * (1 + 0.10 * SIN(0.6 * days.d + c.id) + 0.02 * cc.id - 0.07) AS price
+    FROM crops c
+    CROSS JOIN collection_centres cc
+    CROSS JOIN days
+)
+SELECT crop_id,
+       centre_id,
+       CURDATE() - INTERVAL d DAY,
+       ROUND(price * 0.90, 2),
+       ROUND(price * 1.10, 2),
+       ROUND(price, 2)
+FROM priced;
