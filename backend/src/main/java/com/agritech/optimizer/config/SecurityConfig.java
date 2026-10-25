@@ -52,12 +52,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/error").permitAll()
+                        // must come before the public GET rule below: the first matching rule wins
+                        .requestMatchers(HttpMethod.GET, "/api/listings/mine").hasRole("FARMER")
                         .requestMatchers(HttpMethod.GET,
                                 "/api/crops/**", "/api/centres/**", "/api/prices/**", "/api/listings/**")
                         .permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/listings/**").hasRole("FARMER")
                         .requestMatchers(HttpMethod.PUT, "/api/listings/**").hasRole("FARMER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/listings/**").hasRole("FARMER")
                         .requestMatchers(HttpMethod.DELETE, "/api/listings/**").hasRole("FARMER")
                         .anyRequest().authenticated())
                 // return 401 instead of a login page when no valid token is sent
