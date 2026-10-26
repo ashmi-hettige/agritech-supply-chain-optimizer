@@ -99,7 +99,7 @@ export default function RegisterPage() {
       role: form.role,
       fullName: form.fullName.trim(),
       email: form.email.trim(),
-      phone: form.phone || null,
+      phone: form.phone.trim(),
       district: form.district || null,
       password: form.password,
       farmName: isFarmer ? form.farmName.trim() : null,
@@ -158,7 +158,7 @@ export default function RegisterPage() {
             <div className="form-row">
               <FormField id="email" label="Email" type="email" autoComplete="email"
                 value={form.email} onChange={handleChange} error={errors.email} />
-              <FormField id="phone" label="Phone (optional)" type="tel" autoComplete="tel"
+              <FormField id="phone" label="Phone" type="tel" autoComplete="tel"
                 placeholder="0771234567" value={form.phone} onChange={handleChange} error={errors.phone} />
             </div>
 

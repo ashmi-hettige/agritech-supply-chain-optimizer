@@ -25,6 +25,7 @@ public record RegisterRequest(
                  message = "Password must contain at least one letter and one number")
         String password,
 
+        @NotBlank(message = "Phone is required")
         @Pattern(regexp = "^0\\d{9}$", message = "Phone must be 10 digits starting with 0")
         String phone,
 
