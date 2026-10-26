@@ -28,6 +28,7 @@
 .auth-switch { font-size: var(--text-small); color: var(--muted); text-align: center; }
 
 .auth-photo-side {
+  order: -1; /* photo on the left, form on the right; the form stays first for keyboard users */
   position: relative;
   overflow: hidden;
   color: var(--white);
@@ -45,7 +46,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(19, 63, 36, 0.92) 0%, rgba(19, 63, 36, 0.25) 60%, rgba(19, 63, 36, 0.1) 100%);
+  background: linear-gradient(180deg, rgba(19, 63, 36, 0.92) 0%, rgba(19, 63, 36, 0.35) 40%, rgba(19, 63, 36, 0.05) 70%);
 }
 
 .auth-photo-caption {
@@ -53,7 +54,7 @@
   z-index: 1;
   left: var(--space-7);
   right: var(--space-7);
-  bottom: var(--space-7);
+  top: var(--space-8);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);

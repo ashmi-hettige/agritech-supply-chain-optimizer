@@ -29,10 +29,9 @@ export function validateRegister(form) {
   if (!form.email.trim()) errors.email = 'Email is required';
   else if (!EMAIL_PATTERN.test(form.email.trim())) errors.email = 'Enter a valid email address';
 
-  if (form.phone && !PHONE_PATTERN.test(form.phone)) {
-    errors.phone = 'Phone must be 10 digits starting with 0';
-  }
-
+  if (!form.phone.trim()) errors.phone = 'Phone is required';
+  else if (!PHONE_PATTERN.test(form.phone.trim())) errors.phone = 'Phone must be 10 digits starting with 0';
+  
   if (!form.password) errors.password = 'Password is required';
   else if (form.password.length < 8 || form.password.length > 64) errors.password = 'Password must be 8 to 64 characters';
   else if (!PASSWORD_PATTERN.test(form.password)) errors.password = 'Password must contain at least one letter and one number';

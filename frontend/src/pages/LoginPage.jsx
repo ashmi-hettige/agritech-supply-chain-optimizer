@@ -61,7 +61,6 @@ export default function LoginPage() {
         <div className="auth-form-wrap">
           <div className="auth-heading">
             <h1>Log in</h1>
-            <p className="text-muted">Welcome back. Enter your email and password to continue.</p>
           </div>
 
           {serverError && <div className="alert alert-error" role="alert">{serverError}</div>}

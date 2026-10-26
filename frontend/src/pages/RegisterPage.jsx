@@ -3,7 +3,7 @@
  * @author Ashmi Hettige
  */
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
 import FormField from '../components/FormField';
 import useAuth from '../hooks/useAuth';
@@ -42,8 +42,13 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const showToast = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  // links like /register?role=BUYER open the form with that role already chosen
+  const roleFromLink = searchParams.get('role');
+  const startRole = ROLES.some((role) => role.value === roleFromLink) ? roleFromLink : 'FARMER';
+
+  const [form, setForm] = useState({ ...EMPTY_FORM, role: startRole });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -94,7 +99,7 @@ export default function RegisterPage() {
       role: form.role,
       fullName: form.fullName.trim(),
       email: form.email.trim(),
-      phone: form.phone || null,
+      phone: form.phone.trim(),
       district: form.district || null,
       password: form.password,
       farmName: isFarmer ? form.farmName.trim() : null,
@@ -125,7 +130,6 @@ export default function RegisterPage() {
         <div className="auth-form-wrap wide">
           <div className="auth-heading">
             <h1>Create your account</h1>
-            <p className="text-muted">It is free. Choose how you will use GoviRoute.</p>
           </div>
 
           {serverError && <div className="alert alert-error" role="alert">{serverError}</div>}
@@ -154,7 +158,7 @@ export default function RegisterPage() {
             <div className="form-row">
               <FormField id="email" label="Email" type="email" autoComplete="email"
                 value={form.email} onChange={handleChange} error={errors.email} />
-              <FormField id="phone" label="Phone (optional)" type="tel" autoComplete="tel"
+              <FormField id="phone" label="Phone" type="tel" autoComplete="tel"
                 placeholder="0771234567" value={form.phone} onChange={handleChange} error={errors.phone} />
             </div>
 
