@@ -1,0 +1,151 @@
+/* Sidebar layout for logged-in pages. Author: Ashmi Hettige */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--mist);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  flex: 0 0 var(--sidebar-width);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-4);
+  background: var(--forest-ink);
+  color: var(--white);
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-2);
+}
+
+.sidebar-logo { color: var(--white); }
+
+.menu-toggle { display: none; }
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: rgba(254, 254, 254, 0.82);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.sidebar-link:hover {
+  background: rgba(254, 254, 254, 0.06);
+  color: var(--white);
+}
+
+/* NavLink adds the "active" class to the link for the current page */
+.sidebar-link.active {
+  background: rgba(154, 197, 64, 0.18);
+  color: var(--white);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--lime-bright);
+}
+
+.sidebar-user {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-1) 0;
+  border-top: 1px solid rgba(254, 254, 254, 0.1);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lime);
+  color: var(--forest-ink);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.sidebar-user-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-user-text strong { font-size: var(--text-small); }
+.sidebar-user-text span { font-size: var(--text-caption); color: rgba(254, 254, 254, 0.72); }
+
+.logout-button {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(254, 254, 254, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(254, 254, 254, 0.06);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover { background: rgba(254, 254, 254, 0.14); }
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+/* Phones and small tablets: the sidebar becomes a top bar with a menu button */
+@media (max-width: 900px) {
+  .app-shell { flex-direction: column; }
+
+  .sidebar {
+    position: sticky;
+    z-index: 50;
+    height: auto;
+    flex: none;
+    gap: 0;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 var(--space-4);
+    border: 1px solid rgba(254, 254, 254, 0.3);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .sidebar-nav,
+  .sidebar-user { display: none; }
+
+  .sidebar-open .sidebar-nav { display: flex; padding-top: var(--space-4); }
+  .sidebar-open .sidebar-user { display: flex; margin-top: var(--space-4); }
+
+  .app-main { padding: var(--space-5) var(--space-4); }
+}
