@@ -22,10 +22,16 @@ const FEATURES = [
   { icon: TruckIcon, title: 'Shared, full lorries', text: 'Fewer trips, lower transport costs' },
 ];
 
+const STEPS = [
+  { title: 'List your harvest', text: 'Farmers add the crop, quantity, price and harvest date. Freshness is tracked automatically.' },
+  { title: 'Buyers place orders', text: 'Buyers search by crop, district and freshness, then order and pay on delivery.' },
+  { title: 'Planned delivery', text: 'Confirmed orders are grouped into full lorry trips along a short route.' },
+];
+
 const ROLES = [
   {
     label: 'Farmers', heading: 'Sell at the right market', role: 'FARMER', cta: 'Register',
-    text: 'Check today\'s prices and sell where you earn the most.',
+    text: 'Sell where today\'s prices pay you the most.', 
     image: '/images/paddy-farmer.jpg', alt: 'A farmer standing in a green paddy field', position: 'center 30%',
   },
   {
@@ -263,8 +269,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="how" className="section container" aria-labelledby="roles-title">
+      <section id="how" className="section container" aria-labelledby="how-title">
         <div className="section-title">
+          <p className="eyebrow">How it works</p>
+          <h2 id="how-title">From the field to the buyer in three steps</h2>
+        </div>
+        <ol className="steps">
+          {STEPS.map((step, index) => (
+            <li key={step.title} className="step-card">
+              <span className="step-number" aria-hidden="true">{index + 1}</span>
+              <h3>{step.title}</h3>
+              <p className="text-muted">{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section id="roles" className="section container" aria-labelledby="roles-title">        <div className="section-title">
           <p className="eyebrow">One platform, three roles</p>
           <h2 id="roles-title">Built for everyone in the chain</h2>
         </div>
