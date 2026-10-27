@@ -89,3 +89,31 @@ export function LogoutIcon(props) {
     </Icon>
   );
 }
+
+
+export function CartIcon(props) {
+  return (
+    <Icon strokeWidth={2} {...props}>
+      <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2" />
+      <circle cx="10" cy="20" r="1.3" />
+      <circle cx="17" cy="20" r="1.3" />
+    </Icon>
+  );
+}
+
+export function PhoneIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+    </Icon>
+  );
+}
+
+export function MapPinIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </Icon>
+  );
+}

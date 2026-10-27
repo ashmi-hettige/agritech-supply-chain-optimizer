@@ -1,5 +1,5 @@
 /**
- * All page routes. Logged-in pages sit inside ProtectedRoute and the sidebar layout.
+ * All page routes. Logged-in pages sit inside ProtectedRoute; role-only pages check the role too.
  * @author Ashmi Hettige
  */
 import { Route, Routes } from 'react-router-dom';
@@ -14,6 +14,9 @@ import MarketplacePage from './pages/MarketplacePage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import MyListingsPage from './pages/MyListingsPage';
 import ListingFormPage from './pages/ListingFormPage';
+import CartPage from './pages/CartPage';
+import MyOrdersPage from './pages/MyOrdersPage';
+import IncomingOrdersPage from './pages/IncomingOrdersPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -27,6 +30,12 @@ export default function App() {
       <Route element={<MarketLayout />}>
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/listings/:id" element={<ListingDetailPage />} />
+
+        {/* buyers only: cart and orders keep the marketplace header */}
+        <Route element={<ProtectedRoute roles={['BUYER']} />}>
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/orders" element={<MyOrdersPage />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute />}>
@@ -37,6 +46,7 @@ export default function App() {
             <Route path="/farmer/listings" element={<MyListingsPage />} />
             <Route path="/farmer/listings/new" element={<ListingFormPage />} />
             <Route path="/farmer/listings/:id/edit" element={<ListingFormPage />} />
+            <Route path="/farmer/orders" element={<IncomingOrdersPage />} />
           </Route>
         </Route>
       </Route>

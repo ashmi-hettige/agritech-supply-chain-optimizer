@@ -1,5 +1,6 @@
 /**
  * Buyer marketplace: filters on the left, listing cards on the right, sort and pagination.
+ * Logged-in buyers can add produce to the cart straight from a card.
  * All filters live in the URL (?cropId=1&district=Matale…), so results can be bookmarked and shared.
  * @author Ashmi Hettige
  */
@@ -8,11 +9,16 @@ import { Link, useSearchParams } from 'react-router-dom';
 import api, { getErrorMessage } from '../api/client';
 import FreshnessBadge from '../components/FreshnessBadge';
 import Pagination from '../components/Pagination';
+import useAuth from '../hooks/useAuth';
+import useCart from '../hooks/useCart';
+import useToast from '../hooks/useToast';
 import { DISTRICTS } from '../constants/districts';
 import { formatKg, formatPrice } from '../utils/format';
 import './Marketplace.css';
 
 const PAGE_SIZE = 12;
+// "Add to cart" on a card adds this many kg (or all that is left); the buyer can change it in the cart
+const QUICK_ADD_KG = 10;
 
 const FRESHNESS_OPTIONS = [
   { value: 'FRESH', label: 'Fresh' },
@@ -44,6 +50,9 @@ function readFilters(params) {
 }
 
 export default function MarketplacePage() {
+  const { user } = useAuth();
+  const cart = useCart();
+  const showToast = useToast();
   const [params, setParams] = useSearchParams();
   const filters = readFilters(params);
 
@@ -114,6 +123,12 @@ export default function MarketplacePage() {
     FILTER_KEYS.forEach((key) => next.delete(key));
     next.delete('page');
     setParams(next);
+  }
+
+  function quickAdd(listing) {
+    const kg = Math.min(QUICK_ADD_KG, Number(listing.availableKg));
+    cart.setItem(listing, kg);
+    showToast(`Added ${kg} kg ${listing.cropName.toLowerCase()} to your cart`);
   }
 
   function changePage(page) {
@@ -253,13 +268,13 @@ export default function MarketplacePage() {
             <div className={`listing-grid ${loading ? 'is-loading' : ''}`}>
               {page.content.map((listing) => (
                 <article key={listing.id} className="listing-card">
-                  <div className="listing-photo">
-                    <img src={listing.cropImageUrl} alt={listing.cropName} />
+                  <Link to={`/listings/${listing.id}`} className="listing-photo" tabIndex={-1} aria-hidden="true">
+                    <img src={listing.cropImageUrl} alt="" />
                     <FreshnessBadge label={listing.freshnessLabel} daysLeft={listing.daysLeft} className="photo-badge" />
-                  </div>
+                  </Link>
                   <div className="listing-body">
                     <div className="listing-title">
-                      <h3>{listing.cropName}</h3>
+                      <h3><Link to={`/listings/${listing.id}`}>{listing.cropName}</Link></h3>
                       <span>Grade {listing.grade}</span>
                     </div>
                     <p className="listing-farm">{listing.farmName ?? listing.farmerName} · {listing.district}</p>
@@ -267,7 +282,17 @@ export default function MarketplacePage() {
                       <span className="price">{formatPrice(listing.pricePerKg)}<small>/kg</small></span>
                       <span className="text-muted">{formatKg(listing.availableKg)} left</span>
                     </div>
-                    <Link to={`/listings/${listing.id}`} className="btn btn-primary btn-block">View details</Link>
+                    {user?.role !== 'BUYER' && (
+                      <Link to={`/listings/${listing.id}`} className="btn btn-primary btn-block">View details</Link>
+                    )}
+                    {user?.role === 'BUYER' && cart.getItem(listing.id) && (
+                      <Link to="/cart" className="btn btn-outline btn-block">In your cart · View</Link>
+                    )}
+                    {user?.role === 'BUYER' && !cart.getItem(listing.id) && (
+                      <button type="button" className="btn btn-primary btn-block" onClick={() => quickAdd(listing)}>
+                        Add to cart
+                      </button>
+                    )}
                   </div>
                 </article>
               ))}

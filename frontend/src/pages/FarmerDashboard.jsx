@@ -1,18 +1,20 @@
 /**
- * Farmer's dashboard: greeting banner, four stat cards, latest listings and a price tip.
- * Sold and Revenue start at zero and are filled in from delivered orders.
+ * Farmer's dashboard: greeting banner, four stat cards, latest listings, a price tip
+ * and new orders to confirm or reject. Sold and Revenue come from this month's delivered orders.
  * @author Ashmi Hettige
  */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { getErrorMessage } from '../api/client';
 import FreshnessBadge from '../components/FreshnessBadge';
+import OrderActions from '../components/OrderActions';
 import StatusBadge from '../components/StatusBadge';
 import { ArrowRightIcon, PlusIcon } from '../components/Icons';
-import { formatKg, formatPrice } from '../utils/format';
+import { formatKg, formatPrice, timeAgo } from '../utils/format';
 import './Farmer.css';
 
 const PREVIEW_ROWS = 4;
+const NEW_ORDER_ROWS = 3;
 const monthName = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(new Date());
 
 function greeting() {
@@ -85,27 +87,56 @@ function PriceTip({ listing }) {
   );
 }
 
+const EMPTY_SUMMARY = { soldKg: 0, revenue: 0, deliveredOrders: 0, newOrders: 0 };
+
+// "80 kg beans, 20 kg leeks"
+function itemSummary(order) {
+  return order.items.map((item) => `${formatKg(item.quantityKg)} ${item.cropName.toLowerCase()}`).join(', ');
+}
+
 export default function FarmerDashboard({ user }) {
-  const [data, setData] = useState({ loaded: false, listings: [], farmName: '', error: '' });
+  const [reloadCount, setReloadCount] = useState(0);
+  const [data, setData] = useState({
+    count: -1, listings: [], farmName: '', summary: EMPTY_SUMMARY, newOrders: [], error: '',
+  });
+  const loaded = data.count >= 0;
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.get('/listings/mine'), api.get('/farms')])
-      .then(([listingResponse, farmResponse]) => {
+    Promise.all([
+      api.get('/listings/mine'),
+      api.get('/farms'),
+      api.get('/orders/summary'),
+      api.get('/orders/incoming'),
+    ])
+      .then(([listingResponse, farmResponse, summaryResponse, orderResponse]) => {
         const farm = farmResponse.data.find((item) => item.farmerId === user.id);
         if (!cancelled) {
-          setData({ loaded: true, listings: listingResponse.data, farmName: farm?.farmName ?? '', error: '' });
+          setData({
+            count: reloadCount,
+            listings: listingResponse.data,
+            farmName: farm?.farmName ?? '',
+            summary: summaryResponse.data,
+            newOrders: orderResponse.data.filter((order) => order.status === 'PLACED'),
+            error: '',
+          });
         }
       })
       .catch((error) => {
-        if (!cancelled) setData({ loaded: true, listings: [], farmName: '', error: getErrorMessage(error) });
+        if (!cancelled) {
+          setData({
+            count: reloadCount, listings: [], farmName: '', summary: EMPTY_SUMMARY, newOrders: [],
+            error: getErrorMessage(error),
+          });
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [user.id]);
+  }, [user.id, reloadCount]);
 
-  const { listings } = data;
+  const reload = () => setReloadCount((count) => count + 1);
+  const { listings, summary } = data;
   const active = listings.filter((listing) => listing.status === 'AVAILABLE');
   const availableKg = active.reduce((total, listing) => total + Number(listing.availableKg), 0);
   const expiringSoon = active.filter((listing) => listing.daysLeft <= 2);
@@ -136,7 +167,7 @@ export default function FarmerDashboard({ user }) {
       <div className="stat-cards">
         <div className="stat-card">
           <span className="stat-title">Active listings</span>
-          <span className="stat-number">{data.loaded ? active.length : '–'}</span>
+          <span className="stat-number">{loaded ? active.length : '–'}</span>
           <span className="stat-note">{formatKg(availableKg)} available</span>
         </div>
         <div className="stat-card">
@@ -144,21 +175,27 @@ export default function FarmerDashboard({ user }) {
             <span className="stat-title">Sold</span>
             <span className="month-pill">{monthName}</span>
           </div>
-          <span className="stat-number">0 kg</span>
-          <span className="stat-note">No deliveries yet</span>
+          <span className="stat-number">{formatKg(summary.soldKg)}</span>
+          <span className="stat-note">
+            {summary.newOrders > 0
+              ? <Link to="/farmer/orders">{summary.newOrders} new {summary.newOrders === 1 ? 'order' : 'orders'} waiting</Link>
+              : 'From delivered orders'}
+          </span>
         </div>
         <div className="stat-card">
           <div className="stat-title-row">
             <span className="stat-title">Revenue</span>
             <span className="month-pill">{monthName}</span>
           </div>
-          <span className="stat-number">LKR 0</span>
-          <span className="stat-note">0 orders delivered</span>
+          <span className="stat-number">{formatPrice(summary.revenue)}</span>
+          <span className="stat-note">
+            {summary.deliveredOrders} {summary.deliveredOrders === 1 ? 'order' : 'orders'} delivered
+          </span>
         </div>
         <div className="stat-card warning">
           <span className="stat-title">Expiring within 2 days</span>
           <span className="stat-number">
-            {data.loaded ? `${expiringSoon.length} ${expiringSoon.length === 1 ? 'listing' : 'listings'}` : '–'}
+            {loaded ? `${expiringSoon.length} ${expiringSoon.length === 1 ? 'listing' : 'listings'}` : '–'}
           </span>
           <Link to="/farmer/listings" className="stat-link">Review <ArrowRightIcon size={15} /></Link>
         </div>
@@ -171,7 +208,7 @@ export default function FarmerDashboard({ user }) {
             <Link to="/farmer/listings">See all</Link>
           </div>
 
-          {data.loaded && listings.length === 0 && (
+          {loaded && listings.length === 0 && (
             <p className="text-muted">
               You have no listings yet. <Link to="/farmer/listings/new">Add your first harvest</Link>.
             </p>
@@ -212,6 +249,25 @@ export default function FarmerDashboard({ user }) {
 
         {biggestListing && <PriceTip listing={biggestListing} />}
       </div>
+
+      <section className="panel" aria-labelledby="new-orders-title">
+        <div className="panel-head">
+          <h2 id="new-orders-title">New orders</h2>
+          <Link to="/farmer/orders">All orders</Link>
+        </div>
+        {loaded && data.newOrders.length === 0 && (
+          <p className="text-muted">No new orders right now. Buyers' orders appear here for you to confirm.</p>
+        )}
+        {data.newOrders.slice(0, NEW_ORDER_ROWS).map((order) => (
+          <div key={order.id} className="new-order-row">
+            <div className="new-order-text">
+              <strong>Order #{order.id} · {order.buyerName}, {order.deliveryAddress}</strong>
+              <span>{itemSummary(order)} · {formatPrice(order.totalAmount)} · placed {timeAgo(order.createdAt)}</span>
+            </div>
+            <OrderActions order={order} viewer="FARMER" onChanged={reload} />
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

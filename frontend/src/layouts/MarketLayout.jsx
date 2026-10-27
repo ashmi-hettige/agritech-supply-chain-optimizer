@@ -1,10 +1,13 @@
 /**
- * Layout for the public marketplace pages: top bar with logo, search box and account links.
+ * Layout for the marketplace pages: top bar with logo, search box and account links.
+ * Buyers also get My orders and the cart here.
  * @author Ashmi Hettige
  */
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { CartIcon } from '../components/Icons';
 import useAuth from '../hooks/useAuth';
+import useCart from '../hooks/useCart';
 import './MarketLayout.css';
 
 function SearchIcon() {
@@ -16,8 +19,13 @@ function SearchIcon() {
   );
 }
 
+function initials(name) {
+  return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('');
+}
+
 export default function MarketLayout() {
   const { user } = useAuth();
+  const { count } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -55,13 +63,27 @@ export default function MarketLayout() {
           </form>
 
           <nav className="market-nav" aria-label="Marketplace">
-            <NavLink to="/marketplace">Marketplace</NavLink>
-            {user ? (
+            <NavLink to="/marketplace" className="nav-marketplace">Marketplace</NavLink>
+            {user?.role === 'BUYER' && (
+              <>
+                <NavLink to="/orders">My orders</NavLink>
+                <NavLink to="/cart" className="cart-link" aria-label={`Cart, ${count} ${count === 1 ? 'item' : 'items'}`}>
+                  <CartIcon size={18} />
+                  <span className="cart-text">Cart</span>
+                  <span className="count-pill">{count}</span>
+                </NavLink>
+                <Link to="/dashboard" className="header-avatar" title="Dashboard" aria-label="Dashboard">
+                  {initials(user.fullName)}
+                </Link>
+              </>
+            )}
+            {user && user.role !== 'BUYER' && (
               <>
                 {user.role === 'FARMER' && <NavLink to="/farmer/listings">My listings</NavLink>}
                 <Link to="/dashboard" className="btn btn-primary">Dashboard</Link>
               </>
-            ) : (
+            )}
+            {!user && (
               <>
                 <Link to="/login" state={{ from: location.pathname }}>Log in</Link>
                 <Link to="/register?role=BUYER" className="btn btn-primary">Join free</Link>

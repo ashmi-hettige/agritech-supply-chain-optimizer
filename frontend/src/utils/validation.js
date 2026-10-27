@@ -74,3 +74,22 @@ export function validateListing(form, today) {
 
   return errors;
 }
+
+
+// one cart line: same limits as CartItemRequest.java
+export function validateOrderQuantity(value, availableKg) {
+  const text = String(value).trim();
+  if (text === '') return 'Enter how many kg you want';
+  if (!MONEY_PATTERN.test(text)) return 'Enter a number of kg, e.g. 25 or 12.5';
+  if (Number(text) < 1) return 'Order at least 1 kg';
+  if (Number(text) > Number(availableKg)) return `Only ${Number(availableKg)} kg left`;
+  return '';
+}
+
+export function validateCheckout(form) {
+  const errors = {};
+  if (!form.deliveryAddress.trim()) errors.deliveryAddress = 'Delivery address is required';
+  else if (form.deliveryAddress.trim().length > 200) errors.deliveryAddress = 'Address must be at most 200 characters';
+  if (!form.district) errors.district = 'Choose the delivery district';
+  return errors;
+}

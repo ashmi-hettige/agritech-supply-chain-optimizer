@@ -297,3 +297,19 @@
   .listing-editor { grid-template-columns: 1fr; }
   .listing-preview { position: static; }
 }
+
+
+/* "New orders" rows with Reject / Confirm, as in the design */
+.new-order-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--mist);
+}
+
+.new-order-text { flex: 1 1 260px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.new-order-text strong { font-size: 15px; }
+.new-order-text span { font-size: var(--text-label); color: var(--muted); }
