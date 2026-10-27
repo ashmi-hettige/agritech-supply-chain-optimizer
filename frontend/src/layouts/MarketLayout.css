@@ -1,0 +1,69 @@
+/* Top bar for the marketplace pages. Author: Ashmi Hettige */
+.market-shell {
+  min-height: 100vh;
+  background: var(--mist);
+}
+
+.market-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--white);
+  border-bottom: 1px solid rgba(24, 48, 22, 0.08);
+}
+
+.market-header-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.market-search {
+  flex: 1 1 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--mist);
+  border: 1.5px solid rgba(24, 48, 22, 0.1);
+  color: var(--muted);
+}
+
+.market-search:focus-within { border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(154, 197, 64, 0.35); }
+
+.market-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--forest-ink);
+}
+
+.market-nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.market-nav > a:not(.btn) {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.market-nav > a.active { color: var(--forest); font-weight: 700; }
+
+@media (max-width: 640px) {
+  .market-header-inner { gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+  .market-search { order: 3; flex-basis: 100%; }
+  .market-nav { margin-left: auto; gap: var(--space-4); }
+}
