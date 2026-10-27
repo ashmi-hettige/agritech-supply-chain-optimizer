@@ -27,17 +27,20 @@ public class ListingController {
         this.listingService = listingService;
     }
 
+    // e.g. /api/listings?cropId=1&cropId=3&freshness=FRESH&district=Matale&sort=price_asc&page=0
     @GetMapping
     public PageResponse<ListingResponse> search(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) Long cropId,
+            @RequestParam(name = "cropId", required = false) List<Long> cropIds,
             @RequestParam(required = false) String district,
+            @RequestParam(required = false) Long farmerId,
+            @RequestParam(required = false) List<String> freshness,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(defaultValue = "expiring_soon") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
-        return listingService.search(q, cropId, district, minPrice, maxPrice, sort, page, size);
+        return listingService.search(q, cropIds, district, farmerId, freshness, minPrice, maxPrice, sort, page, size);
     }
 
     @GetMapping("/mine")

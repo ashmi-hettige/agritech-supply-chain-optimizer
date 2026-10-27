@@ -5,15 +5,18 @@ import com.agritech.optimizer.dto.listing.DeleteResult;
 import com.agritech.optimizer.dto.listing.ListingRequest;
 import com.agritech.optimizer.dto.listing.ListingResponse;
 import com.agritech.optimizer.entity.Crop;
+import com.agritech.optimizer.entity.FarmerProfile;
 import com.agritech.optimizer.entity.ListingStatus;
 import com.agritech.optimizer.entity.ProduceListing;
 import com.agritech.optimizer.entity.User;
 import com.agritech.optimizer.exception.BusinessRuleException;
 import com.agritech.optimizer.exception.ResourceNotFoundException;
 import com.agritech.optimizer.repository.CropRepository;
+import com.agritech.optimizer.repository.FarmerProfileRepository;
 import com.agritech.optimizer.repository.ListingSpecifications;
 import com.agritech.optimizer.repository.ProduceListingRepository;
 import com.agritech.optimizer.repository.UserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Business rules for produce listings: create, search, update, pause and safe delete.
@@ -39,39 +45,42 @@ public class ListingService {
     private final ProduceListingRepository listingRepository;
     private final CropRepository cropRepository;
     private final UserRepository userRepository;
+    private final FarmerProfileRepository farmerProfileRepository;
 
     public ListingService(ProduceListingRepository listingRepository,
                           CropRepository cropRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          FarmerProfileRepository farmerProfileRepository) {
         this.listingRepository = listingRepository;
         this.cropRepository = cropRepository;
         this.userRepository = userRepository;
+        this.farmerProfileRepository = farmerProfileRepository;
     }
 
-    public PageResponse<ListingResponse> search(String q, Long cropId, String district,
-                                                BigDecimal minPrice, BigDecimal maxPrice,
+    public PageResponse<ListingResponse> search(String q, List<Long> cropIds, String district, Long farmerId,
+                                                List<String> freshness, BigDecimal minPrice, BigDecimal maxPrice,
                                                 String sort, int page, int size) {
         LocalDate today = LocalDate.now();
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(Math.max(page, 0), safeSize, toSort(sort));
 
-        var spec = ListingSpecifications.forMarketplace(q, cropId, district, minPrice, maxPrice, today);
-        return PageResponse.from(listingRepository.findAll(spec, pageable)
-                .map(listing -> ListingResponse.from(listing, today)));
+        var spec = ListingSpecifications.forMarketplace(
+                q, cropIds, district, farmerId, freshness, minPrice, maxPrice, today);
+        Page<ProduceListing> result = listingRepository.findAll(spec, pageable);
+
+        return new PageResponse<>(toResponses(result.getContent(), today), result.getNumber(),
+                result.getSize(), result.getTotalElements(), result.getTotalPages());
     }
 
     public ListingResponse getById(Long id) {
-        return ListingResponse.from(findListing(id), LocalDate.now());
+        return toResponse(findListing(id));
     }
 
     public List<ListingResponse> myListings(String email) {
         User farmer = currentUser(email);
-        LocalDate today = LocalDate.now();
-        return listingRepository
-                .findByFarmerIdAndStatusNotOrderByCreatedAtDesc(farmer.getId(), ListingStatus.ARCHIVED)
-                .stream()
-                .map(listing -> ListingResponse.from(listing, today))
-                .toList();
+        List<ProduceListing> listings = listingRepository
+                .findByFarmerIdAndStatusNotOrderByCreatedAtDesc(farmer.getId(), ListingStatus.ARCHIVED);
+        return toResponses(listings, LocalDate.now());
     }
 
     @Transactional
@@ -85,7 +94,7 @@ public class ListingService {
                 request.pickupLat(), request.pickupLng());
         rejectIfExpired(listing);
 
-        return ListingResponse.from(listingRepository.save(listing), LocalDate.now());
+        return toResponse(listingRepository.save(listing));
     }
 
     @Transactional
@@ -121,7 +130,7 @@ public class ListingService {
             listing.setStatus(ListingStatus.AVAILABLE);
         }
         // no save() call: the entity is managed, so Hibernate writes the changes at commit
-        return ListingResponse.from(listing, LocalDate.now());
+        return toResponse(listing);
     }
 
     @Transactional
@@ -143,7 +152,7 @@ public class ListingService {
             }
         }
         listing.setStatus(newStatus);
-        return ListingResponse.from(listing, LocalDate.now());
+        return toResponse(listing);
     }
 
     // safe delete: a listing that appears in orders is archived, so order history stays complete
@@ -157,6 +166,26 @@ public class ListingService {
         }
         listingRepository.delete(listing);
         return new DeleteResult(false, "Listing deleted");
+    }
+
+    private ListingResponse toResponse(ProduceListing listing) {
+        return toResponses(List.of(listing), LocalDate.now()).get(0);
+    }
+
+    // looks up the farm names for all listings in ONE query, instead of one query per listing
+    private List<ListingResponse> toResponses(List<ProduceListing> listings, LocalDate today) {
+        Set<Long> farmerIds = listings.stream()
+                .map(listing -> listing.getFarmer().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, String> farmNames = farmerIds.isEmpty()
+                ? Map.of()
+                : farmerProfileRepository.findByUserIdIn(farmerIds).stream()
+                        .collect(Collectors.toMap(profile -> profile.getUser().getId(), FarmerProfile::getFarmName));
+
+        return listings.stream()
+                .map(listing -> ListingResponse.from(listing, today, farmNames.get(listing.getFarmer().getId())))
+                .toList();
     }
 
     private ProduceListing findListing(Long id) {
@@ -187,14 +216,14 @@ public class ListingService {
     // only these sort options are allowed, so users cannot sort on hidden columns
     private Sort toSort(String sort) {
         if (sort == null) {
-            return Sort.by("createdAt").descending();
+            return Sort.by("expiryDate").ascending();
         }
         return switch (sort) {
             case "price_asc" -> Sort.by("pricePerKg").ascending();
             case "price_desc" -> Sort.by("pricePerKg").descending();
             case "harvest_newest" -> Sort.by("harvestDate").descending();
-            case "expiring_soon" -> Sort.by("expiryDate").ascending();
-            default -> Sort.by("createdAt").descending();
+            case "newest" -> Sort.by("createdAt").descending();
+            default -> Sort.by("expiryDate").ascending(); // "expiring_soon": sell-soon produce first
         };
     }
 }
