@@ -193,3 +193,19 @@
 
   .app-main { padding: var(--space-5) var(--space-4); }
 }
+
+/* wheat count of new orders next to "Incoming orders" */
+.nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--wheat);
+  color: var(--forest-ink);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
