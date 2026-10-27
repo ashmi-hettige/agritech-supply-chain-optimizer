@@ -4,7 +4,9 @@
  */
 import { useEffect, useRef } from 'react';
 
-export default function ConfirmDialog({ open, title, message, confirmLabel, busy, onConfirm, onCancel }) {
+export default function ConfirmDialog({
+  open, title, message, confirmLabel, cancelLabel = 'Cancel', busy, onConfirm, onCancel,
+}) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel, busy
       <p className="text-muted">{message}</p>
       <div className="confirm-actions">
         <button type="button" className="btn btn-outline" onClick={onCancel} disabled={busy}>
-          Cancel
+          {cancelLabel}
         </button>
         <button type="button" className="btn btn-danger" onClick={onConfirm} disabled={busy}>
           {busy ? 'Please wait…' : confirmLabel}

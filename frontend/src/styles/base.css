@@ -369,3 +369,31 @@ img { max-width: 100%; display: block; }
 }
 
 .back-button:hover { background: var(--lime); border-color: var(--lime); color: var(--forest-ink); }
+
+
+/* ---------- Order statuses, added on Day 7 ---------- */
+.order-placed { color: #8a6a12; }
+.order-confirmed,
+.order-assigned,
+.order-picked-up,
+.order-in-transit { color: var(--leaf-text); }
+.order-delivered { color: var(--forest); }
+.order-rejected,
+.order-cancelled { color: var(--clay); }
+
+.btn-outline-danger { background: var(--white); border-color: var(--clay); color: var(--clay); }
+.btn-outline-danger:hover:not(:disabled) { background: #fbeee9; color: var(--clay); }
+
+.count-pill {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--lime);
+  color: var(--forest-ink);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
