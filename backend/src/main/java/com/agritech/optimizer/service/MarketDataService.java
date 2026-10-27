@@ -3,10 +3,12 @@ package com.agritech.optimizer.service;
 import com.agritech.optimizer.dto.reference.CentrePriceResponse;
 import com.agritech.optimizer.dto.reference.CentreResponse;
 import com.agritech.optimizer.dto.reference.CropResponse;
+import com.agritech.optimizer.dto.reference.FarmOption;
 import com.agritech.optimizer.entity.MarketPrice;
 import com.agritech.optimizer.exception.ResourceNotFoundException;
 import com.agritech.optimizer.repository.CollectionCentreRepository;
 import com.agritech.optimizer.repository.CropRepository;
+import com.agritech.optimizer.repository.FarmerProfileRepository;
 import com.agritech.optimizer.repository.MarketPriceRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * Read-only reference data: crops, economic centres and market prices.
+ * Read-only reference data: crops, economic centres, farms and market prices.
  *
  * @author Ashmi Hettige
  */
@@ -29,13 +31,16 @@ public class MarketDataService {
     private final CropRepository cropRepository;
     private final CollectionCentreRepository centreRepository;
     private final MarketPriceRepository priceRepository;
+    private final FarmerProfileRepository farmerProfileRepository;
 
     public MarketDataService(CropRepository cropRepository,
                              CollectionCentreRepository centreRepository,
-                             MarketPriceRepository priceRepository) {
+                             MarketPriceRepository priceRepository,
+                             FarmerProfileRepository farmerProfileRepository) {
         this.cropRepository = cropRepository;
         this.centreRepository = centreRepository;
         this.priceRepository = priceRepository;
+        this.farmerProfileRepository = farmerProfileRepository;
     }
 
     public List<CropResponse> crops() {
@@ -44,6 +49,10 @@ public class MarketDataService {
 
     public List<CentreResponse> centres() {
         return centreRepository.findAll(Sort.by("name")).stream().map(CentreResponse::from).toList();
+    }
+
+    public List<FarmOption> farms() {
+        return farmerProfileRepository.findAllByOrderByFarmNameAsc().stream().map(FarmOption::from).toList();
     }
 
     public List<CentrePriceResponse> latestPrices(Long cropId) {

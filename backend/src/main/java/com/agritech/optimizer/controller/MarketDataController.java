@@ -3,6 +3,7 @@ package com.agritech.optimizer.controller;
 import com.agritech.optimizer.dto.reference.CentrePriceResponse;
 import com.agritech.optimizer.dto.reference.CentreResponse;
 import com.agritech.optimizer.dto.reference.CropResponse;
+import com.agritech.optimizer.dto.reference.FarmOption;
 import com.agritech.optimizer.service.MarketDataService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Public endpoints for crops, economic centres and prices.
+ * Public endpoints for crops, economic centres, farms and prices.
  *
  * @author Ashmi Hettige
  */
@@ -34,6 +35,11 @@ public class MarketDataController {
     @GetMapping("/centres")
     public List<CentreResponse> centres() {
         return marketDataService.centres();
+    }
+
+    @GetMapping("/farms")
+    public List<FarmOption> farms() {
+        return marketDataService.farms();
     }
 
     @GetMapping("/prices/latest")
