@@ -71,3 +71,21 @@ export function UsersIcon(props) {
 export function ShieldCheckIcon(props) {
   return <Icon {...props}><path d="M12 3l8 4v5c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V7z" /><path d="M9 12l2 2 4-4" /></Icon>;
 }
+
+export function ArrowLeftIcon(props) {
+  return <Icon strokeWidth={2.6} {...props}><path d="M19 12H5M11 18l-6-6 6-6" /></Icon>;
+}
+
+export function PlusIcon(props) {
+  return <Icon strokeWidth={2.2} {...props}><path d="M12 5v14M5 12h14" /></Icon>;
+}
+
+export function LogoutIcon(props) {
+  return (
+    <Icon {...props}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </Icon>
+  );
+}
