@@ -62,8 +62,49 @@
 
 .market-nav > a.active { color: var(--forest); font-weight: 700; }
 
+/* dark cart button with a lime count, as in the design */
+.market-nav > a.cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: 10px;
+  background: var(--forest);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.market-nav > a.cart-link svg { color: var(--lime); }
+.market-nav > a.cart-link:hover,
+.market-nav > a.cart-link.active { background: var(--forest-ink); color: var(--white); }
+
+.market-nav > a.header-avatar {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--forest-ink);
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   .market-header-inner { gap: var(--space-3); padding: var(--space-3) var(--space-4); }
   .market-search { order: 3; flex-basis: 100%; }
   .market-nav { margin-left: auto; gap: var(--space-4); }
+
+  /* buyers: keep the phone header to one line */
+  .market-nav:has(.cart-link) .nav-marketplace,
+  .market-nav .cart-text { display: none; }
+  .market-nav > a.cart-link { padding: 0 var(--space-3); }
+}
+
+@media (max-width: 480px) {
+  /* buyers: show just the leaf mark so the links fit beside it */
+  .market-header-inner:has(.cart-link) .logo-text { display: none; }
 }
