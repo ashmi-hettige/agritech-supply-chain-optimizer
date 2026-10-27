@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * A listing as sent to the React app, including its freshness badge.
+ * A listing as sent to the React app, including its freshness badge and farm name.
  *
  * @author Ashmi Hettige
  */
@@ -21,6 +21,7 @@ public record ListingResponse(
         String cropImageUrl,
         Long farmerId,
         String farmerName,
+        String farmName,
         BigDecimal quantityKg,
         BigDecimal availableKg,
         BigDecimal pricePerKg,
@@ -36,7 +37,7 @@ public record ListingResponse(
         String freshnessLabel,
         LocalDateTime createdAt) {
 
-    public static ListingResponse from(ProduceListing listing, LocalDate today) {
+    public static ListingResponse from(ProduceListing listing, LocalDate today, String farmName) {
         Freshness freshness = FreshnessScorer.score(
                 listing.getExpiryDate(), listing.getCrop().getShelfLifeDays(), today);
 
@@ -47,6 +48,7 @@ public record ListingResponse(
                 listing.getCrop().getImageUrl(),
                 listing.getFarmer().getId(),
                 listing.getFarmer().getFullName(),
+                farmName,
                 listing.getQuantityKg(),
                 listing.getAvailableKg(),
                 listing.getPricePerKg(),

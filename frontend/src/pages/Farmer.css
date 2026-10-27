@@ -1,0 +1,299 @@
+/* Farmer pages: dashboard, My listings table and the listing form. Author: Ashmi Hettige */
+
+/* ---------- Table ---------- */
+.table-card {
+  overflow-x: auto; /* the table scrolls sideways on phones instead of squashing */
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(24, 48, 22, 0.06);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.data-table th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  vertical-align: middle;
+  border-bottom: 1px solid #edf1e6;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.crop-cell { display: flex; align-items: center; gap: var(--space-3); }
+
+.crop-cell img {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.crop-cell div { display: flex; flex-direction: column; }
+.crop-cell strong { font-size: 15px; }
+.crop-cell span,
+.cell-note { font-size: var(--text-caption); color: var(--muted); }
+.cell-note { display: block; }
+
+.row-actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+
+/* ---------- Listing form with live preview ---------- */
+.listing-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.listing-form .farm-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--mist);
+  border: 1px solid var(--border);
+}
+
+.listing-form .location-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.form-actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
+
+.input:disabled { background: var(--mist); color: var(--muted); }
+
+/* the preview stays in view while the farmer scrolls the form */
+.listing-preview {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.preview-card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(24, 48, 22, 0.08);
+}
+
+.preview-photo { position: relative; height: 180px; }
+.preview-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.preview-photo .photo-badge { position: absolute; left: 10px; top: 10px; box-shadow: 0 2px 6px rgba(24, 48, 22, 0.18); }
+.preview-photo .badge-fresh { background: var(--white); color: var(--forest-ink); }
+.preview-photo .badge-soon { background: var(--wheat); color: var(--forest-ink); }
+.preview-photo .badge-urgent { background: var(--clay); color: var(--white); }
+
+.preview-body { display: flex; flex-direction: column; gap: 6px; padding: var(--space-4); }
+.preview-body p { font-size: var(--text-label); }
+
+.preview-title { display: flex; align-items: baseline; justify-content: space-between; }
+.preview-title span { font-size: var(--text-caption); font-weight: 600; color: var(--muted); }
+
+.preview-price { display: flex; align-items: baseline; justify-content: space-between; font-size: var(--text-label); }
+.preview-price .price { font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--forest); }
+.preview-price small { font-size: var(--text-label); font-weight: 500; color: var(--muted); }
+
+.expiry-note {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: #e8f3d6;
+  color: var(--leaf-text);
+  font-size: var(--text-small);
+}
+
+/* ---------- Farmer dashboard ---------- */
+.farmer-dashboard { display: flex; flex-direction: column; gap: var(--space-5); }
+
+.farm-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 168px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-lg);
+  color: var(--white);
+}
+
+.farm-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 62%;
+}
+
+.farm-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(19, 63, 36, 0.93) 0%, rgba(19, 63, 36, 0.72) 50%, rgba(19, 63, 36, 0.15) 100%);
+}
+
+.farm-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 28px var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.farm-hero-person { display: flex; align-items: center; gap: 18px; }
+
+.hero-avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--lime);
+  background: rgba(254, 254, 254, 0.12);
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.farm-hero h1 { font-size: var(--text-h2); line-height: 1.2; }
+.farm-hero p { color: rgba(254, 254, 254, 0.88); margin-top: var(--space-1); font-size: 15px; }
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--white);
+  border: 1px solid rgba(24, 48, 22, 0.08);
+}
+
+.stat-title-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.stat-card .stat-title { font-size: var(--text-small); font-weight: 600; color: var(--muted); }
+
+.month-pill {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--mist);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  color: var(--leaf-text);
+}
+
+.stat-card .stat-number {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--forest);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card .stat-note { font-size: var(--text-label); color: var(--muted); }
+
+.stat-card.warning { background: var(--wheat); border-color: var(--wheat); }
+.stat-card.warning .stat-title,
+.stat-card.warning .stat-number,
+.stat-card.warning a { color: var(--forest-ink); }
+
+.stat-link { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-label); font-weight: 700; }
+
+.dashboard-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--white);
+  border: 1px solid rgba(24, 48, 22, 0.08);
+}
+
+.listings-panel { flex: 2 1 520px; min-width: 0; }
+
+.panel-head { display: flex; align-items: center; justify-content: space-between; }
+.panel-head h2 { font-size: var(--text-h3); }
+.table-scroll { overflow-x: auto; }
+.panel .data-table { min-width: 560px; }
+.panel .data-table th,
+.panel .data-table td { padding-left: var(--space-2); padding-right: var(--space-2); }
+.panel .crop-cell img { width: 40px; height: 40px; }
+
+/* dark "Price tip" card beside the listings */
+.tip-panel {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--forest);
+  color: var(--white);
+}
+
+.tip-eyebrow {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.tip-panel h2 { font-size: var(--text-h3); margin-top: var(--space-1); }
+.tip-note { font-size: var(--text-small); color: rgba(254, 254, 254, 0.85); margin-top: var(--space-1); }
+
+.tip-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.tip-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: rgba(254, 254, 254, 0.07);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.tip-list li.best { background: var(--lime); color: var(--forest-ink); font-weight: 700; }
+.tip-footnote { font-size: var(--text-caption); color: rgba(254, 254, 254, 0.7); }
+
+@media (max-width: 1000px) {
+  .listing-editor { grid-template-columns: 1fr; }
+  .listing-preview { position: static; }
+}

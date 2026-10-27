@@ -1,12 +1,14 @@
 /**
- * First page after login. Greets the user; role-specific panels are added on later days.
+ * First page after login. Farmers get their own dashboard; other roles see a greeting and shortcuts.
  * @author Ashmi Hettige
  */
+import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import { ROLE_LABELS } from '../constants/navigation';
+import { QUICK_ACTIONS, ROLE_LABELS } from '../constants/navigation';
+import { ArrowRightIcon } from '../components/Icons';
+import FarmerDashboard from './FarmerDashboard';
 
 const INTRO = {
-  FARMER: 'List your harvest, check today\'s prices and see where you will earn the most.',
   BUYER: 'Find fresh produce from farms across Sri Lanka and track every order.',
   TRANSPORTER: 'Register your vehicles and follow the trips planned for you.',
   ADMIN: 'Manage crops, centres and daily prices, and plan delivery trips.',
@@ -21,7 +23,13 @@ function greeting() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+
+  if (user.role === 'FARMER') {
+    return <FarmerDashboard user={user} />;
+  }
+
   const firstName = user.fullName.split(' ')[0];
+  const actions = QUICK_ACTIONS[user.role] ?? [];
 
   return (
     <section className="dashboard" aria-labelledby="dashboard-title">
@@ -32,6 +40,16 @@ export default function DashboardPage() {
       <p className="text-muted" style={{ marginTop: 'var(--space-2)', maxWidth: 620 }}>
         {INTRO[user.role]}
       </p>
+
+      <div className="quick-actions">
+        {actions.map((action) => (
+          <Link key={action.to} to={action.to} className="quick-action card">
+            <strong>{action.title}</strong>
+            <span className="text-muted">{action.text}</span>
+            <span className="quick-action-arrow"><ArrowRightIcon size={18} /></span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

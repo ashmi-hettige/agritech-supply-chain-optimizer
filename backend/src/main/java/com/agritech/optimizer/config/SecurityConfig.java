@@ -55,8 +55,7 @@ public class SecurityConfig {
                         // must come before the public GET rule below: the first matching rule wins
                         .requestMatchers(HttpMethod.GET, "/api/listings/mine").hasRole("FARMER")
                         .requestMatchers(HttpMethod.GET,
-                                "/api/crops/**", "/api/centres/**", "/api/prices/**", "/api/listings/**")
-                        .permitAll()
+                                "/api/crops/**", "/api/centres/**", "/api/prices/**", "/api/farms/**", "/api/listings/**")                        .permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/listings/**").hasRole("FARMER")
                         .requestMatchers(HttpMethod.PUT, "/api/listings/**").hasRole("FARMER")
