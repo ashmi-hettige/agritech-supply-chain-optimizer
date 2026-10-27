@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import SidebarPrices from '../components/SidebarPrices';
+import { LogoutIcon } from '../components/Icons';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
 import { NAV_LINKS, ROLE_LABELS } from '../constants/navigation';
@@ -56,6 +58,7 @@ export default function AppLayout() {
             <NavLink
               key={link.to}
               to={link.to}
+              end={link.to === '/dashboard'}
               className="sidebar-link"
               onClick={() => setMenuOpen(false)}
             >
@@ -64,18 +67,24 @@ export default function AppLayout() {
           ))}
         </nav>
 
-        <div className="sidebar-user">
-          <span className="avatar" aria-hidden="true">{initials(user.fullName)}</span>
-          <div className="sidebar-user-text">
-            <strong>{user.fullName}</strong>
-            <span>
-              {ROLE_LABELS[user.role]}
-              {user.district ? ` · ${user.district}` : ''}
-            </span>
+        <div className="sidebar-bottom">
+          {user.role === 'FARMER' && <SidebarPrices />}
+
+          <div className="sidebar-user">
+            <span className="avatar" aria-hidden="true">{initials(user.fullName)}</span>
+            <div className="sidebar-user-text">
+              <strong>{user.fullName}</strong>
+              <span>
+                {ROLE_LABELS[user.role]}
+                {user.district ? ` · ${user.district}` : ''}
+              </span>
+            </div>
+            <button type="button" className="logout-button" onClick={handleLogout} aria-label="Log out" title="Log out">
+              <LogoutIcon size={18} />
+            </button>
           </div>
-          <button type="button" className="logout-button" onClick={handleLogout}>
-            Log out
-          </button>
+
+          <p className="sidebar-copy">© 2026 GoviRoute. All rights reserved.</p>
         </div>
       </aside>
 
