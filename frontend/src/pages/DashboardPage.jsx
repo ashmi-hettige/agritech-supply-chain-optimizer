@@ -1,5 +1,5 @@
 /**
- * First page after login. Farmers get their own dashboard; other roles see a greeting and shortcuts.
+ * First page after login. Farmers and admins get their own dashboards; others see a greeting and shortcuts.
  * @author Ashmi Hettige
  */
 import { Link } from 'react-router-dom';
@@ -7,6 +7,7 @@ import useAuth from '../hooks/useAuth';
 import { QUICK_ACTIONS, ROLE_LABELS } from '../constants/navigation';
 import { ArrowRightIcon } from '../components/Icons';
 import FarmerDashboard from './FarmerDashboard';
+import AdminDashboard from './admin/AdminDashboard';
 
 const INTRO = {
   BUYER: 'Find fresh produce from farms across Sri Lanka and track every order.',
@@ -26,6 +27,9 @@ export default function DashboardPage() {
 
   if (user.role === 'FARMER') {
     return <FarmerDashboard user={user} />;
+  }
+  if (user.role === 'ADMIN') {
+    return <AdminDashboard user={user} />;
   }
 
   const firstName = user.fullName.split(' ')[0];
