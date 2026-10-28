@@ -25,8 +25,12 @@ export const NAV_LINKS = {
   ],
   ADMIN: [
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/marketplace', label: 'Marketplace' },
+    { to: '/admin/prices', label: 'Daily prices' },
+    { to: '/admin/users', label: 'Users' },
+    { to: '/admin/crops', label: 'Crops' },
+    { to: '/admin/centres', label: 'Economic centres' },
     { to: '/prices', label: 'Market prices' },
+    { to: '/marketplace', label: 'Marketplace' },
   ],
 };
 
@@ -37,7 +41,7 @@ export const ROLE_LABELS = {
   ADMIN: 'Logistics admin',
 };
 
-// shortcuts on the buyer, transporter and admin dashboards (farmers have their own dashboard)
+// shortcuts on the buyer and transporter dashboards (farmers and admins have their own dashboards)
 export const QUICK_ACTIONS = {
   BUYER: [
     { to: '/marketplace', title: 'Browse produce', text: 'Search by crop, district and freshness.' },
@@ -46,8 +50,5 @@ export const QUICK_ACTIONS = {
   ],
   TRANSPORTER: [
     { to: '/marketplace', title: 'See the marketplace', text: 'What farmers are selling right now.' },
-  ],
-  ADMIN: [
-    { to: '/marketplace', title: 'See the marketplace', text: 'All produce currently on sale.' },
   ],
 };
