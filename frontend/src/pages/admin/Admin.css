@@ -1,0 +1,62 @@
+/* Logistics admin pages. Author: Ashmi Hettige */
+.admin-title { margin: var(--space-2) 0 var(--space-5); }
+.admin-dashboard .quick-actions { margin-top: var(--space-5); }
+
+/* table on the left, add/edit form on the right */
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.admin-layout .data-table { min-width: 560px; }
+.data-table tbody tr.selected td { background: #eef6dd; }
+.data-table.is-loading { opacity: 0.55; }
+
+.admin-form { position: sticky; top: var(--space-5); }
+.admin-form h2 { font-size: var(--text-h3); }
+
+.picture-row { display: flex; align-items: flex-end; gap: var(--space-3); }
+.picture-row .field { flex: 1; }
+.picture-preview { width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover; }
+
+/* Daily prices */
+.price-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.price-filters .field { min-width: 200px; }
+.price-filters .field-hint { flex-basis: 100%; }
+
+.price-entry td { vertical-align: top; }
+.price-entry td .field-error { display: block; margin-top: 4px; }
+.price-input { width: 110px; min-height: 40px; text-align: right; }
+
+/* Users */
+.user-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.user-filters .tab-row { margin-bottom: 0; }
+.user-search { display: flex; gap: var(--space-2); }
+.user-search .input { width: 240px; }
+
+@media (max-width: 1000px) {
+  .admin-layout { grid-template-columns: minmax(0, 1fr); }
+  .admin-form { position: static; }
+}
+
+@media (max-width: 560px) {
+  .user-search { width: 100%; }
+  .user-search .input { width: auto; flex: 1; }
+}
