@@ -17,6 +17,12 @@ import ListingFormPage from './pages/ListingFormPage';
 import CartPage from './pages/CartPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import IncomingOrdersPage from './pages/IncomingOrdersPage';
+import AdvisorPage from './pages/AdvisorPage';
+import MarketPricesPage from './pages/MarketPricesPage';
+import AdminCropsPage from './pages/admin/AdminCropsPage';
+import AdminCentresPage from './pages/admin/AdminCentresPage';
+import AdminPricesPage from './pages/admin/AdminPricesPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -41,12 +47,21 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/prices" element={<MarketPricesPage />} />
 
           <Route element={<ProtectedRoute roles={['FARMER']} />}>
             <Route path="/farmer/listings" element={<MyListingsPage />} />
             <Route path="/farmer/listings/new" element={<ListingFormPage />} />
             <Route path="/farmer/listings/:id/edit" element={<ListingFormPage />} />
             <Route path="/farmer/orders" element={<IncomingOrdersPage />} />
+            <Route path="/farmer/advisor" element={<AdvisorPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+            <Route path="/admin/prices" element={<AdminPricesPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/crops" element={<AdminCropsPage />} />
+            <Route path="/admin/centres" element={<AdminCentresPage />} />
           </Route>
         </Route>
       </Route>

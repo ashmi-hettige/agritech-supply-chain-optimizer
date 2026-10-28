@@ -1,0 +1,128 @@
+/* Best-market advisor and Market prices. Author: Ashmi Hettige */
+.page-intro { margin-top: var(--space-2); max-width: 620px; }
+
+/* ---------- Advisor ---------- */
+.advisor-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.advisor-form { position: sticky; top: var(--space-5); }
+.mode-switch { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.advisor-result { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+
+.best-market {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: 16px;
+  background: var(--forest);
+  color: var(--white);
+}
+
+.best-market h2 { font-size: var(--text-h2); }
+.best-net { font-size: 17px; color: rgba(254, 254, 254, 0.9); }
+.best-net strong { color: var(--lime); font-family: var(--font-heading); font-size: 22px; }
+
+.best-extra {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--lime);
+  color: var(--forest-ink);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.market-bars { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+
+.market-bar-head { display: flex; justify-content: space-between; gap: var(--space-3); font-variant-numeric: tabular-nums; }
+.market-bar-head span { font-weight: 700; }
+
+.market-bar-track { height: 12px; margin: 6px 0; border-radius: 6px; background: var(--mist); overflow: hidden; }
+.market-bar-fill { height: 100%; border-radius: 6px; background: var(--leaf); }
+.market-bars li.best .market-bar-fill { background: var(--lime); }
+
+.market-bar-note { font-size: var(--text-label); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- Market prices ---------- */
+.crop-tabs { margin-bottom: var(--space-4); }
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.price-table { min-width: 460px; }
+.price-table abbr { text-decoration: none; }
+.price-table tbody tr { cursor: pointer; }
+.price-table tbody tr:hover td { background: #f8faf3; }
+.price-table tbody tr.selected td { background: #eef6dd; }
+.price-table td .badge { margin-top: 4px; }
+
+.row-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--forest-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  text-align: left;
+  cursor: pointer;
+}
+
+.row-button span { font-size: var(--text-caption); color: var(--muted); }
+
+.trend { font-weight: 700; color: var(--muted); white-space: nowrap; }
+.trend.up { color: var(--leaf-text); }
+.trend.down { color: var(--clay); }
+
+/* price chart */
+.price-chart { position: relative; margin: 0; }
+.price-chart svg { width: 100%; height: auto; display: block; touch-action: pan-y; }
+
+.chart-grid { stroke: #e6ebde; stroke-width: 1; }
+.chart-axis { fill: var(--muted); font-size: 12px; font-family: var(--font-body); }
+.chart-band { fill: rgba(154, 197, 64, 0.28); stroke: none; }
+.chart-line { fill: none; stroke: var(--forest); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-dot { fill: var(--forest); stroke: var(--white); stroke-width: 2; }
+
+.chart-tooltip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  font-size: var(--text-label);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chart-key { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-label); color: var(--muted); }
+.key-line { width: 18px; height: 2px; background: var(--forest); }
+.key-band { width: 18px; height: 10px; margin-left: var(--space-3); border-radius: 2px; background: rgba(154, 197, 64, 0.4); }
+
+@media (max-width: 1100px) {
+  .insight-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .advisor-layout { grid-template-columns: minmax(0, 1fr); }
+  .advisor-form { position: static; }
+}

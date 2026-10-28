@@ -63,7 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/listings/**").hasRole("FARMER")
                         .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("BUYER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/mine").hasRole("BUYER")
-                        .requestMatchers(HttpMethod.GET, "/api/orders/incoming", "/api/orders/summary").hasRole("FARMER")                      
+                        .requestMatchers(HttpMethod.GET, "/api/orders/incoming", "/api/orders/summary").hasRole("FARMER")
+                        .requestMatchers("/api/advisor/**").hasRole("FARMER")
                         .anyRequest().authenticated())
                 // return 401 instead of a login page when no valid token is sent
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
