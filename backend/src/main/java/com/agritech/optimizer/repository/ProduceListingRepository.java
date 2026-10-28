@@ -36,6 +36,10 @@ public interface ProduceListingRepository
             + "from OrderItem oi where oi.listing.id = :listingId")
     boolean hasOrders(@Param("listingId") Long listingId);
 
+    boolean existsByCropId(Long cropId);
+
+    long countByStatus(ListingStatus status);
+
     // SELECT ... FOR UPDATE: locks these rows until checkout commits, so two buyers
     // cannot both buy the last 50 kg at the same moment
     @Lock(LockModeType.PESSIMISTIC_WRITE)

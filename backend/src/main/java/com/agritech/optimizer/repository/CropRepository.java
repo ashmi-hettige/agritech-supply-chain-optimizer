@@ -9,4 +9,8 @@ import java.util.List;
 public interface CropRepository extends JpaRepository<Crop, Long> {
 
     List<Crop> findAllByOrderByNameAsc();
+
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }
