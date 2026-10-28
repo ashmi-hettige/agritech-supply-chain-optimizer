@@ -4,6 +4,7 @@ import com.agritech.optimizer.dto.reference.CentrePriceResponse;
 import com.agritech.optimizer.dto.reference.CentreResponse;
 import com.agritech.optimizer.dto.reference.CropResponse;
 import com.agritech.optimizer.dto.reference.FarmOption;
+import com.agritech.optimizer.dto.reference.PriceHistoryResponse;
 import com.agritech.optimizer.entity.MarketPrice;
 import com.agritech.optimizer.exception.ResourceNotFoundException;
 import com.agritech.optimizer.repository.CollectionCentreRepository;
@@ -53,6 +54,35 @@ public class MarketDataService {
 
     public List<FarmOption> farms() {
         return farmerProfileRepository.findAllByOrderByFarmNameAsc().stream().map(FarmOption::from).toList();
+    }
+
+    // daily prices for the chart: one series per centre, oldest day first
+    public List<PriceHistoryResponse> priceHistory(Long cropId, int days) {
+        if (!cropRepository.existsById(cropId)) {
+            throw new ResourceNotFoundException("Crop " + cropId + " not found");
+        }
+        int safeDays = Math.min(Math.max(days, 7), 60);
+        LocalDate from = LocalDate.now().minusDays(safeDays - 1L);
+        List<MarketPrice> prices =
+                priceRepository.findByCropIdAndPriceDateGreaterThanEqualOrderByPriceDateDesc(cropId, from);
+
+        Map<Long, List<MarketPrice>> byCentre = new LinkedHashMap<>();
+        for (MarketPrice price : prices) {
+            byCentre.computeIfAbsent(price.getCentre().getId(), key -> new ArrayList<>()).add(price);
+        }
+
+        List<PriceHistoryResponse> result = new ArrayList<>();
+        for (List<MarketPrice> centrePrices : byCentre.values()) {
+            List<PriceHistoryResponse.DayPrice> series = centrePrices.stream()
+                    .sorted(Comparator.comparing(MarketPrice::getPriceDate))
+                    .map(price -> new PriceHistoryResponse.DayPrice(price.getPriceDate(), price.getMinPrice(),
+                            price.getAvgPrice(), price.getMaxPrice()))
+                    .toList();
+            MarketPrice any = centrePrices.get(0);
+            result.add(new PriceHistoryResponse(any.getCentre().getId(), any.getCentre().getName(), series));
+        }
+        result.sort(Comparator.comparing(PriceHistoryResponse::centreName));
+        return result;
     }
 
     public List<CentrePriceResponse> latestPrices(Long cropId) {
