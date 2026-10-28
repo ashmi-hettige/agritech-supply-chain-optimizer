@@ -44,3 +44,8 @@ export function timeAgo(isoDateTime) {
   if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
   return formatDateTime(isoDateTime);
 }
+
+// "Dambulla Dedicated Economic Centre" becomes "Dambulla"
+export function shortCentreName(name) {
+  return name.replace(/\s*(Dedicated\s+)?Economic Centre$/i, '');
+}

@@ -1,5 +1,5 @@
 /**
- * Farmer's dashboard: greeting banner, four stat cards, latest listings, a price tip
+ * Farmer's dashboard: greeting banner, four stat cards, latest listings, an advisor tip
  * and new orders to confirm or reject. Sold and Revenue come from this month's delivered orders.
  * @author Ashmi Hettige
  */
@@ -10,7 +10,7 @@ import FreshnessBadge from '../components/FreshnessBadge';
 import OrderActions from '../components/OrderActions';
 import StatusBadge from '../components/StatusBadge';
 import { ArrowRightIcon, PlusIcon } from '../components/Icons';
-import { formatKg, formatPrice, timeAgo } from '../utils/format';
+import { formatKg, formatPrice, shortCentreName, timeAgo } from '../utils/format';
 import './Farmer.css';
 
 const PREVIEW_ROWS = 4;
@@ -28,20 +28,18 @@ function initials(name) {
   return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('');
 }
 
-// "Dambulla Dedicated Economic Centre" -> "Dambulla"
-function shortCentreName(name) {
-  return name.replace(/\s*(Dedicated\s+)?Economic Centre$/i, '');
-}
-
-function PriceTip({ listing }) {
-  const [centres, setCentres] = useState([]);
+// "Advisor tip": the best centre for the farmer's biggest listing, after transport cost
+function AdvisorTip({ listing }) {
+  const [advice, setAdvice] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     api
-      .get('/prices/latest', { params: { cropId: listing.cropId } })
+      .get('/advisor', {
+        params: { cropId: listing.cropId, quantityKg: listing.availableKg, lat: listing.pickupLat, lng: listing.pickupLng },
+      })
       .then(({ data }) => {
-        if (!cancelled) setCentres(data);
+        if (!cancelled) setAdvice(data);
       })
       .catch(() => {
         // the tip is optional; the rest of the dashboard still works
@@ -49,40 +47,39 @@ function PriceTip({ listing }) {
     return () => {
       cancelled = true;
     };
-  }, [listing.cropId]);
+  }, [listing.cropId, listing.availableKg, listing.pickupLat, listing.pickupLng]);
 
-  if (centres.length === 0) {
+  if (!advice) {
     return null;
   }
 
-  // value of the farmer's available stock at each centre, highest first
-  const kg = Number(listing.availableKg);
-  const values = centres
-    .map((centre) => ({ name: shortCentreName(centre.centreName), value: Number(centre.latestAvgPrice) * kg }))
-    .sort((a, b) => b.value - a.value);
-  const best = values[0];
-  const lowest = values[values.length - 1];
+  const best = advice.options[0];
+  const topNet = Number(best.netValue);
 
   return (
     <section className="tip-panel" aria-labelledby="tip-title">
       <div>
-        <p className="tip-eyebrow">Price tip</p>
-        <h2 id="tip-title">Sell your {listing.cropName.toLowerCase()} at {best.name}</h2>
-        {values.length > 1 && (
-          <p className="tip-note">
-            {formatPrice(Math.round(best.value - lowest.value))} more than {lowest.name} for {formatKg(kg)}
-          </p>
-        )}
+        <p className="tip-eyebrow">Advisor tip</p>
+        <h2 id="tip-title">Sell your {listing.cropName.toLowerCase()} at {shortCentreName(best.centreName)}</h2>
+        <p className="tip-note">
+          {Number(advice.extraVsNearest) > 0
+            ? `${formatPrice(Math.round(advice.extraVsNearest))} more than ${shortCentreName(advice.nearestCentreName)} for ${formatKg(listing.availableKg)}, after transport`
+            : `The nearest centre pays the most for ${formatKg(listing.availableKg)} today`}
+        </p>
       </div>
       <ul className="tip-list">
-        {values.slice(0, 4).map((centre, index) => (
-          <li key={centre.name} className={index === 0 ? 'best' : ''}>
-            <span>{centre.name}</span>
-            <span>{Math.round(centre.value).toLocaleString('en-LK')}</span>
+        {advice.options.slice(0, 4).map((option, index) => (
+          <li key={option.centreId} className={index === 0 ? 'best' : ''}>
+            <span>{shortCentreName(option.centreName)}</span>
+            <span>{Math.round(Number(option.netValue)).toLocaleString('en-LK')}</span>
+            <span className="tip-bar" aria-hidden="true">
+              <span style={{ width: `${Math.max(4, (Number(option.netValue) / topNet) * 100)}%` }} />
+            </span>
           </li>
         ))}
       </ul>
-      <p className="tip-footnote">Today&apos;s prices in LKR, before transport cost.</p>
+      <Link to={`/farmer/advisor?listingId=${listing.id}`} className="btn btn-lime btn-block">Open advisor</Link>
+      <p className="tip-footnote">Take-home in LKR after transport, at today&apos;s prices.</p>
     </section>
   );
 }
@@ -247,7 +244,7 @@ export default function FarmerDashboard({ user }) {
           )}
         </section>
 
-        {biggestListing && <PriceTip listing={biggestListing} />}
+        {biggestListing && <AdvisorTip listing={biggestListing} />}
       </div>
 
       <section className="panel" aria-labelledby="new-orders-title">
