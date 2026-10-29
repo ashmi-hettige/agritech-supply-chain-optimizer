@@ -1,16 +1,26 @@
-# React + Vite
+# GoviRoute web client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite app for the Agri-Tech Supply Chain Optimizer. See the main
+[README](../README.md) for the full project.
 
-Currently, two official plugins are available:
+## Run
+```bash
+copy .env.example .env     # VITE_API_BASE_URL=http://localhost:8080/api
+npm install
+npm run dev                # http://localhost:5173
+npm run lint               # ESLint, including the React Hooks rules
+npm run build              # production build in dist/
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Folders
+| Folder | What is in it |
+|---|---|
+| `src/api` | Axios client: adds the JWT, logs out on 401, reads server error messages |
+| `src/context`, `src/hooks` | Logged-in user, toast messages and the buyer's cart |
+| `src/layouts` | `MarketLayout` (top bar, for the marketplace) and `AppLayout` (sidebar, for dashboards) |
+| `src/pages` | One file per page; `pages/admin` holds the logistics admin pages |
+| `src/components` | Shared pieces: badges, dialogs, pagination, order cards, price chart |
+| `src/styles` | Design tokens (colours, type, spacing) and shared styles |
+| `src/utils` | Formatting (LKR, kg, dates) and form validation that matches the backend rules |
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Author: Ashmi Hettige
