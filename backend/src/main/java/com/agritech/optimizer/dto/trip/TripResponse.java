@@ -4,6 +4,7 @@ import com.agritech.optimizer.entity.Order;
 import com.agritech.optimizer.entity.OrderItem;
 import com.agritech.optimizer.entity.OrderStatus;
 import com.agritech.optimizer.entity.Trip;
+import com.agritech.optimizer.entity.TripSlot;
 import com.agritech.optimizer.entity.TripStatus;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.List;
 public record TripResponse(
         Long id,
         LocalDate tripDate,
+        TripSlot slot,
         TripStatus status,
         String plateNo,
         String vehicleType,
@@ -59,7 +61,7 @@ public record TripResponse(
     }
 
     public static TripResponse from(Trip trip) {
-        return new TripResponse(trip.getId(), trip.getTripDate(), trip.getStatus(),
+        return new TripResponse(trip.getId(), trip.getTripDate(), trip.getSlot(), trip.getStatus(),
                 trip.getVehicle().getPlateNo(), trip.getVehicle().getType(), trip.getVehicle().getCapacityKg(),
                 trip.getVehicle().isRefrigerated(), trip.getVehicle().getTransporter().getFullName(),
                 trip.getTotalLoadKg(), trip.getTotalDistanceKm(),

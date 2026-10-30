@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders/incoming", "/api/orders/summary").hasRole("FARMER")
                         .requestMatchers("/api/advisor/**").hasRole("FARMER")
                         .requestMatchers("/api/transporter/**").hasRole("TRANSPORTER")
+                        .requestMatchers("/api/delivery/**").hasRole("FARMER")
                         // farmers can add a crop that is missing from the list; admins manage all crops
                         .requestMatchers(HttpMethod.POST, "/api/crops").hasAnyRole("FARMER", "ADMIN")
                         .anyRequest().authenticated())
