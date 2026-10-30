@@ -326,15 +326,6 @@ export default function LandingPage() {
           <div className="footer-brand">
             <Logo size={40} />
             <p>Fresh produce, fair prices, smarter delivery.</p>
-            <ul className="social-links">
-              {SOCIAL_LINKS.map(({ label, icon: SocialIcon, href }) => (
-                <li key={label}>
-                  <a href={href} target="_blank" rel="noreferrer" aria-label={`GoviRoute on ${label}`}>
-                    <SocialIcon aria-hidden="true" />
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <nav className="footer-col" aria-label="Platform">
@@ -353,8 +344,15 @@ export default function LandingPage() {
 
           <div className="footer-col">
             <strong>Contact</strong>
-            <span>Faculty of Engineering</span>
-            <span>University of Ruhuna, Sri Lanka</span>
+            <ul className="social-links">
+              {SOCIAL_LINKS.map(({ label, icon: SocialIcon, href }) => (
+                <li key={label}>
+                  <a href={href} target="_blank" rel="noreferrer" aria-label={`GoviRoute on ${label}`}>
+                    <SocialIcon aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
         <p className="footer-copy container">© 2026 GoviRoute. All rights reserved.</p>

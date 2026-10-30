@@ -1,19 +1,22 @@
 /**
- * The buyer's cart: change kilos, remove items, enter the delivery address and place the order.
+ * The buyer's cart: change kilos, remove items, choose the delivery point on a map and place the order.
  * Items from different farms become separate orders, because each farm delivers its own.
+ * The buyer can order everything at once, or one farm at a time.
  * @author Ashmi Hettige
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api, { getErrorMessage, getFieldErrors } from '../api/client';
 import BackButton from '../components/BackButton';
 import FormField from '../components/FormField';
+import MapPicker from '../components/MapPicker';
 import useAuth from '../hooks/useAuth';
 import useCart from '../hooks/useCart';
 import useToast from '../hooks/useToast';
 import { DISTRICTS, DISTRICT_CENTRES } from '../constants/districts';
 import { ORDERS_CHANGED_EVENT } from '../constants/orders';
 import { formatKg, formatPrice } from '../utils/format';
+import { findAddress } from '../utils/geocode';
 import { validateCheckout, validateOrderQuantity } from '../utils/validation';
 import './Orders.css';
 
@@ -38,7 +41,12 @@ export default function CartPage() {
   // what the buyer is typing in each kg box, by listing id
   const [drafts, setDrafts] = useState({});
   const [form, setForm] = useState({ deliveryAddress: '', district: user.district ?? '' });
-  const [exactLocation, setExactLocation] = useState(null);
+  // delivery point; until the buyer drops a pin, the district's town centre is used
+  const [point, setPoint] = useState({ lat: '', lng: '' });
+  const [submittingFarm, setSubmittingFarm] = useState(null);
+  // where the map should fly to, and whether the address was typed (look it up) or filled from the map
+  const [deliveryFocus, setDeliveryFocus] = useState(null);
+  const [addressSource, setAddressSource] = useState('typed');
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -67,53 +75,98 @@ export default function CartPage() {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
-    if (name === 'district') setExactLocation(null);
-  }
+    setAddressSource('typed');
 
-  function shareExactLocation() {
-    if (!navigator.geolocation) {
-      showToast('Your browser cannot share its location. The district centre is used instead.', 'error');
-      return;
+    // a new district moves the pin to its town centre straight away; the address search refines it
+    if (name === 'district' && DISTRICT_CENTRES[value]) {
+      const [lat, lng] = DISTRICT_CENTRES[value];
+      setDeliveryPoint(lat.toFixed(5), lng.toFixed(5));
+      setDeliveryFocus([lat, lng]);
     }
-    navigator.geolocation.getCurrentPosition(
-      (position) => setExactLocation([position.coords.latitude, position.coords.longitude]),
-      () => showToast('Location permission was denied. The district centre is used instead.', 'error'),
-    );
   }
 
-  async function placeOrder(event) {
-    event.preventDefault();
+  function setDeliveryPoint(lat, lng) {
+    setPoint({ lat, lng });
+    setErrors((current) => ({ ...current, deliveryLat: undefined, deliveryLng: undefined }));
+  }
+
+  // pin moved on the map: write its address (and district) into the form
+  function deliveryPlaceFound(place) {
+    setAddressSource('map');
+    setForm((current) => ({
+      ...current,
+      deliveryAddress: place.label,
+      district: place.district || current.district,
+    }));
+    setErrors((current) => ({ ...current, deliveryAddress: undefined, district: undefined }));
+  }
+
+  // address typed: when typing stops for a moment, find it and move the pin there
+  useEffect(() => {
+    const text = form.deliveryAddress.trim();
+    if (addressSource !== 'typed' || text.length < 5) {
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const found = await findAddress([text, form.district, 'Sri Lanka'].filter(Boolean).join(', '));
+      if (cancelled || !found) return;
+      setPoint({ lat: found.lat.toFixed(5), lng: found.lng.toFixed(5) });
+      setDeliveryFocus([found.lat, found.lng]);
+    }, 900);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [form.deliveryAddress, form.district, addressSource]);
+
+  // farmerId: order only that farm's items; null: order the whole cart
+  async function placeOrder(farmerId) {
     setServerError('');
 
     const found = validateCheckout(form);
+    const pinned = point.lat !== '' && point.lng !== '';
+    if (pinned && !(Number(point.lat) >= 5.9 && Number(point.lat) <= 9.9 && Number(point.lng) >= 79.5 && Number(point.lng) <= 81.9)) {
+      found.deliveryLat = 'The delivery point must be in Sri Lanka';
+    }
     setErrors(found);
     if (Object.keys(found).length > 0 || hasRowErrors) return;
 
-    const [deliveryLat, deliveryLng] = exactLocation ?? DISTRICT_CENTRES[form.district];
+    const items = farmerId === null ? cart.items : cart.items.filter((item) => item.farmerId === farmerId);
+    const [deliveryLat, deliveryLng] = pinned
+      ? [Number(point.lat), Number(point.lng)]
+      : DISTRICT_CENTRES[form.district];
     const address = form.deliveryAddress.trim();
     const deliveryAddress = address.toLowerCase().includes(form.district.toLowerCase())
       ? address
       : `${address}, ${form.district}`;
 
     setSubmitting(true);
+    setSubmittingFarm(farmerId);
     try {
       const { data: orders } = await api.post('/orders', {
-        items: cart.items.map((item) => ({ listingId: item.listingId, quantityKg: item.quantityKg })),
+        items: items.map((item) => ({ listingId: item.listingId, quantityKg: item.quantityKg })),
         deliveryAddress,
         deliveryLat,
         deliveryLng,
       });
-      cart.clear();
+      items.forEach((item) => cart.removeItem(item.listingId));
       window.dispatchEvent(new Event(ORDERS_CHANGED_EVENT));
-      showToast(orders.length === 1
-        ? `Order #${orders[0].id} placed. Pay cash on delivery.`
-        : `${orders.length} orders placed, one for each farm. Pay cash on delivery.`);
-      navigate('/orders');
+      const placed = orders.length === 1
+        ? `Order #${orders[0].id} placed`
+        : `${orders.length} orders placed, one for each farm`;
+      if (items.length === cart.items.length) {
+        showToast(`${placed}. Pay cash on delivery.`);
+        navigate('/orders');
+      } else {
+        showToast(`${placed}. The other farms are still in your cart.`);
+      }
     } catch (error) {
       setErrors(getFieldErrors(error));
       setServerError(getErrorMessage(error));
     } finally {
       setSubmitting(false);
+      setSubmittingFarm(null);
     }
   }
 
@@ -140,6 +193,12 @@ export default function CartPage() {
                 <header className="cart-group-head">
                   <h2>{group.farmName}</h2>
                   <span className="text-muted">{group.district}</span>
+                  {groups.length > 1 && (
+                    <button type="button" className="btn btn-outline btn-small farm-order-button"
+                      disabled={submitting || hasRowErrors} onClick={() => placeOrder(group.farmerId)}>
+                      {submittingFarm === group.farmerId ? 'Placing…' : `Order from ${group.farmName} only`}
+                    </button>
+                  )}
                 </header>
 
                 {group.items.map((item) => {
@@ -176,13 +235,14 @@ export default function CartPage() {
             ))}
             {groups.length > 1 && (
               <p className="field-hint">
-                This cart becomes {groups.length} orders, one for each farm. Each farm confirms and delivers its own order.
+                Each farm confirms and delivers its own order. Order all {groups.length} farms with
+                {' '}<strong>Place all orders</strong>, or one farm at a time with its own button.
               </p>
             )}
           </div>
 
           <aside className="checkout-panel">
-            <form className="form" onSubmit={placeOrder} noValidate>
+            <form className="form" onSubmit={(event) => { event.preventDefault(); placeOrder(null); }} noValidate>
               <h2>Delivery</h2>
               {serverError && <div className="alert alert-error" role="alert">{serverError}</div>}
 
@@ -194,16 +254,18 @@ export default function CartPage() {
                 {DISTRICTS.map((district) => <option key={district} value={district}>{district}</option>)}
               </FormField>
 
-              <div className="location-choice">
-                <span>
-                  {exactLocation
-                    ? 'Delivering to your current location'
-                    : `Delivering near ${form.district || 'the district'} town centre`}
-                </span>
-                {exactLocation
-                  ? <button type="button" className="link-button" onClick={() => setExactLocation(null)}>Use town centre</button>
-                  : <button type="button" className="link-button" onClick={shareExactLocation}>Use my exact location</button>}
-              </div>
+              <MapPicker
+                id="delivery-point"
+                label="Delivery point"
+                lat={point.lat}
+                lng={point.lng}
+                onChange={setDeliveryPoint}
+                onPlaceFound={deliveryPlaceFound}
+                error={errors.deliveryLat || errors.deliveryLng}
+                focus={deliveryFocus}
+                fallbackCentre={DISTRICT_CENTRES[form.district]}
+                hint="Type the address or choose the district and the pin moves there. Or tap the map, and the address is filled in for you."
+              />
 
               <dl className="checkout-summary">
                 <div><dt>Items</dt><dd>{cart.count}</dd></div>
@@ -213,7 +275,7 @@ export default function CartPage() {
               <p className="field-hint">Pay cash when the produce arrives. Prices and stock are checked again when you order.</p>
 
               <button type="submit" className="btn btn-primary btn-block" disabled={submitting || hasRowErrors}>
-                {submitting ? 'Placing order…' : 'Place order'}
+                {submitting && submittingFarm === null ? 'Placing order…' : groups.length > 1 ? 'Place all orders' : 'Place order'}
               </button>
             </form>
           </aside>

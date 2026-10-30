@@ -320,3 +320,17 @@
 .tip-bar span { display: block; height: 100%; border-radius: 3px; background: var(--leaf); }
 .tip-list li.best .tip-bar { background: rgba(24, 48, 22, 0.15); }
 .tip-list li.best .tip-bar span { background: var(--forest); }
+
+/* "Crop not in the list? Add it" on the listing form */
+.crop-field { display: flex; flex-direction: column; gap: 2px; }
+.add-crop-link { align-self: flex-start; min-height: 32px; padding: 0; }
+
+.new-crop-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--mist);
+  border: 1px dashed var(--leaf);
+}

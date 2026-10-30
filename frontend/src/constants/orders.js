@@ -16,5 +16,7 @@ export const ORDER_STATUS_LABELS = {
 // the normal path of an order, shown as a progress line on My orders
 export const ORDER_STEPS = ['PLACED', 'CONFIRMED', 'DELIVERED'];
 
+export const SLOT_LABELS = { MORNING: 'Morning (6 am – 12 pm)', AFTERNOON: 'Afternoon (12 – 6 pm)' };
+
 // tells the sidebar badge and dashboard to reload after an order changes
 export const ORDERS_CHANGED_EVENT = 'orders:changed';

@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One vehicle's planned route for a day, visiting several orders in sequence.
+ * One vehicle's route for a date and time slot, visiting several orders in sequence.
+ * Orders from different farmers can share a trip while the lorry has room.
  *
  * @author Ashmi Hettige
  */
@@ -25,6 +26,11 @@ public class Trip {
 
     @Column(name = "trip_date", nullable = false)
     private LocalDate tripDate;
+
+    // a transporter drives at most one trip per date and slot
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TripSlot slot;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -44,9 +50,14 @@ public class Trip {
     protected Trip() {
     }
 
-    public Trip(Vehicle vehicle, LocalDate tripDate) {
+    public Trip(Vehicle vehicle, LocalDate tripDate, TripSlot slot) {
         this.vehicle = vehicle;
         this.tripDate = tripDate;
+        this.slot = slot;
+    }
+
+    public TripSlot getSlot() {
+        return slot;
     }
 
     public Long getId() {

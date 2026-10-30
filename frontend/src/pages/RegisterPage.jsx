@@ -5,12 +5,14 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
+import BackButton from '../components/BackButton';
 import FormField from '../components/FormField';
+import MapPicker from '../components/MapPicker';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
 import { getErrorMessage, getFieldErrors } from '../api/client';
 import { validateRegister } from '../utils/validation';
-import { DISTRICTS } from '../constants/districts';
+import { DISTRICTS, DISTRICT_CENTRES } from '../constants/districts';
 import './AuthPage.css';
 
 const ROLES = [
@@ -52,37 +54,32 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [locating, setLocating] = useState(false);
 
   const isFarmer = form.role === 'FARMER';
+  // where the map should fly to: the district's centre when the district changes
+  const [farmFocus, setFarmFocus] = useState(null);
 
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
+
+    // a new district moves the farm pin to that district's centre; the farmer then fine-tunes it
+    if (name === 'district' && DISTRICT_CENTRES[value] && isFarmer) {
+      const [lat, lng] = DISTRICT_CENTRES[value];
+      setFarmPoint(lat.toFixed(5), lng.toFixed(5));
+      setFarmFocus([lat, lng]);
+    }
   }
 
-  function fillMyLocation() {
-    if (!navigator.geolocation) {
-      showToast('Your browser cannot share its location. Please type it in.', 'error');
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setForm((current) => ({
-          ...current,
-          farmLatitude: position.coords.latitude.toFixed(5),
-          farmLongitude: position.coords.longitude.toFixed(5),
-        }));
-        setErrors((current) => ({ ...current, farmLatitude: undefined, farmLongitude: undefined }));
-        setLocating(false);
-      },
-      () => {
-        showToast('Location permission was denied. Please type it in.', 'error');
-        setLocating(false);
-      },
-    );
+  // the pin's address names a district: fill in the District box to match
+  function farmPlaceFound(place) {
+    if (place.district) setForm((current) => ({ ...current, district: place.district }));
+  }
+
+  function setFarmPoint(farmLatitude, farmLongitude) {
+    setForm((current) => ({ ...current, farmLatitude, farmLongitude }));
+    setErrors((current) => ({ ...current, farmLatitude: undefined, farmLongitude: undefined }));
   }
 
   async function handleSubmit(event) {
@@ -123,9 +120,12 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-form-side">
-        <Link to="/" aria-label="GoviRoute home">
-          <Logo size={36} onDark={false} />
-        </Link>
+        <div className="auth-top">
+          <BackButton label="Go back" />
+          <Link to="/" aria-label="GoviRoute home">
+            <Logo size={36} onDark={false} />
+          </Link>
+        </div>
 
         <div className="auth-form-wrap wide">
           <div className="auth-heading">
@@ -182,18 +182,18 @@ export default function RegisterPage() {
               <div className="farm-box">
                 <FormField id="farmName" label="Farm name" placeholder="e.g. Perera Farm"
                   value={form.farmName} onChange={handleChange} error={errors.farmName} />
-                <div className="location-row">
-                  <span className="field-label">Farm location (pickup point)</span>
-                  <button type="button" className="btn btn-outline" onClick={fillMyLocation} disabled={locating}>
-                    {locating ? 'Finding you…' : 'Use my current location'}
-                  </button>
-                </div>
-                <div className="form-row">
-                  <FormField id="farmLatitude" label="Latitude" inputMode="decimal" placeholder="7.85"
-                    value={form.farmLatitude} onChange={handleChange} error={errors.farmLatitude} />
-                  <FormField id="farmLongitude" label="Longitude" inputMode="decimal" placeholder="80.65"
-                    value={form.farmLongitude} onChange={handleChange} error={errors.farmLongitude} />
-                </div>
+                <MapPicker
+                  id="farm-location"
+                  label="Farm location (pickup point)"
+                  lat={form.farmLatitude}
+                  lng={form.farmLongitude}
+                  onChange={setFarmPoint}
+                  error={errors.farmLatitude || errors.farmLongitude}
+                  onPlaceFound={farmPlaceFound}
+                  focus={farmFocus}
+                  fallbackCentre={DISTRICT_CENTRES[form.district]}
+                  hint="Tap your farm on the map, or use your current location if you are at the farm."
+                />
               </div>
             )}
 

@@ -2,18 +2,19 @@
 
 Many Sri Lankan farmers sell their harvest without knowing the prices at the
 economic centres, and a lot of fresh produce spoils before it reaches buyers.
-GoviRoute connects farmers, buyers and a logistics admin on one website. Farmers
-list their harvest and see which market pays the most **after transport**, buyers
-order fresh produce straight from farms, and the admin keeps the daily market
-prices up to date.
+GoviRoute connects farmers, buyers, transporters and a logistics admin on one
+website. Farmers list their harvest and see which market pays the most **after
+transport**, buyers order fresh produce straight from farms, farmers book
+transporters for delivery, and the admin keeps daily market prices up to date.
 
 
 ## Features
 
 | Role | What they can do |
 |---|---|
-| **Farmer** | Add, edit, pause and delete produce listings (a listing with orders is archived instead of deleted) · see a freshness badge on every listing · confirm, reject and deliver incoming orders · dashboard with sales, revenue and an advisor tip · **best-market advisor** · market prices with a 30-day chart |
-| **Buyer** | Search the marketplace by crop, district, farm, freshness and price, with sorting and pages · add to cart · check out (one order per farm, cash on delivery) · follow and cancel orders |
+| **Farmer** | Add, edit, pause and delete produce listings (a listing with orders is archived instead of deleted) · set the farm and pickup point on a map · add a crop that is missing from the list · see a freshness badge on every listing · confirm, reject and deliver incoming orders · **book a transporter** for a date and time · dashboard with sales, revenue and an advisor tip · **best-market advisor** · market prices with a 30-day chart |
+| **Buyer** | Search the marketplace by crop, district, farm, freshness and price, with sorting and pages · add to cart · choose the delivery point on a map · order all farms at once or one farm at a time (cash on delivery) · follow and cancel orders |
+| **Transporter** | Register vehicles (capacity, refrigerated or not) · accept or decline farmers' delivery requests · fill free lorry space from suggested orders · see trips with stops in driving order · start a trip and mark it delivered |
 | **Logistics admin** | Enter daily prices for each crop and centre · add, edit and delete crops and economic centres · find users and disable or enable accounts · platform stats |
 | **Everyone** | Landing page with live prices · register and log in (JWT) · role-based pages |
 
@@ -34,13 +35,23 @@ net value      = today's price × kg − transport cost
 The centre with the highest net value is the best market. A higher price far away
 can lose to a lower price nearby. `BestMarketCalculatorTest` has a worked example.
 
+**Delivery booking.** For a confirmed order the farmer picks a date and a time slot
+(morning or afternoon) and sees the transporters with room: a lorry already going
+that slot with enough free kg, or the smallest free vehicle that fits. Cold-chain
+crops (beans, capsicum) only go on refrigerated vehicles, and a transporter drives at
+most one trip per date and slot. When the transporter accepts, the order joins that
+trip and the stops are re-ordered by **nearest neighbour** (always drive to the closest
+delivery point next). Transporters also get **suggested orders** for their free space,
+chosen heaviest first (**First-Fit Decreasing**). `LoadPlannerTest` and
+`RoutePlannerTest` have worked examples.
+
 **Safe checkout.** Checkout locks the listing rows (`SELECT … FOR UPDATE`), so two
 buyers cannot buy the same last kilos. Stock drops when an order is placed and goes
 back if the farmer rejects or the buyer cancels.
 
 ## Tech stack
 
-- **Frontend:** React 19, Vite 8, React Router 7, Axios
+- **Frontend:** React 19, Vite 8, React Router 7, Axios, Leaflet (maps)
 - **Backend:** Spring Boot 4.1 (Java 25), Spring Security with JWT, Spring Data JPA (Hibernate 7), Bean Validation
 - **Database:** MySQL 9.7
 
@@ -90,7 +101,8 @@ In `.env`:
 - `DB_USERNAME`, `DB_PASSWORD`: your MySQL user
 - `JWT_SECRET`: a random 32-byte key in Base64. In PowerShell:
   `[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))`
-- `ADMIN_EMAIL`, `ADMIN_PASSWORD`: the first logistics admin account, created on startup
+- `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`: the logistics admin account. It is created on
+  startup, and its name and password are updated whenever you change them here and restart
 
 Hibernate creates the tables. `data.sql` then adds 8 crops, 6 economic centres
 and 30 days of sample prices (it is safe to run again on every start).
@@ -116,14 +128,16 @@ mvnw test
 | `FreshnessScorerTest` | Fresh / Sell soon / Urgent boundaries and expired listings |
 | `GeoDistanceTest` | Haversine distance (Colombo to Kandy ≈ 94 km) |
 | `BestMarketCalculatorTest` | Transport cost, net value and ranking, worked by hand |
+| `LoadPlannerTest` | First-Fit Decreasing loading, including the cold-chain rule |
+| `RoutePlannerTest` | Nearest-neighbour stop order |
 | `RequestValidationTest` | Validation rules on listing, checkout and price forms |
 | `AgritechOptimizerApplicationTests` | The whole app starts (needs MySQL running) |
 
 ## Database design
 
-The schema has 12 tables: `users`, `farmer_profiles`, `crops`, `collection_centres`,
+The schema has 13 tables: `users`, `farmer_profiles`, `crops`, `collection_centres`,
 `market_prices`, `produce_listings`, `orders`, `order_items`, `vehicles`, `trips`,
-`notifications` and `buyer_watchlist`.
+`delivery_requests`, `notifications` and `buyer_watchlist`.
 
 ![Entity Relationship Diagram](docs/erd.png)
 
@@ -152,6 +166,16 @@ All endpoints are under `/api`. 🔒 means a JWT is needed (`Authorization: Bear
 | GET | `/orders/incoming`, `/orders/summary` | 🔒 farmer |
 | PATCH | `/orders/{id}/status` | 🔒 farmer (confirm, reject, deliver) or buyer (cancel) |
 | GET | `/advisor?cropId=&quantityKg=&lat=&lng=` | 🔒 farmer |
+| POST | `/crops` | 🔒 farmer or admin (add a missing crop) |
+| GET | `/delivery/options?orderId=&date=&slot=` | 🔒 farmer (transporters with room) |
+| GET, POST | `/delivery/requests` | 🔒 farmer (my requests, send a request) |
+| PATCH | `/delivery/requests/{id}/cancel` | 🔒 farmer |
+| GET, POST, DELETE | `/transporter/vehicles`, `/transporter/vehicles/{id}` | 🔒 transporter |
+| GET | `/transporter/requests`, `/transporter/suggestions` | 🔒 transporter |
+| PATCH | `/transporter/requests/{id}` | 🔒 transporter (accept or decline) |
+| POST | `/transporter/trips/{tripId}/orders/{orderId}` | 🔒 transporter (take a suggested order) |
+| GET | `/transporter/trips` | 🔒 transporter |
+| PATCH | `/transporter/trips/{id}/status` | 🔒 transporter (start, finish) |
 | GET | `/admin/stats`, `/admin/users`, `/admin/prices?date=&cropId=` | 🔒 admin |
 | POST, PUT, DELETE | `/admin/crops`, `/admin/centres` | 🔒 admin |
 | PUT, DELETE | `/admin/prices` | 🔒 admin |
@@ -181,14 +205,16 @@ Errors always come back in one format, for example a 400 with `fieldErrors`:
 
 ## Future work
 
-- Trip planning for transporters (vehicles and trips tables are already in the schema)
+- Live lorry tracking on the map during a trip
 - Notifications page (notifications are already saved for order events)
 - Buyer watchlist for price alerts
 
 ## Credits
 
 Photos are from [Unsplash](https://unsplash.com) under the Unsplash License. See
-`frontend/public/images/CREDITS.txt`.
+`frontend/public/images/CREDITS.txt`. Maps use [Leaflet](https://leafletjs.com) with
+map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Address search
+uses OpenStreetMap's Nominatim service.
 
 ## Author
 Ashmi Hettige

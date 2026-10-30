@@ -397,3 +397,21 @@ img { max-width: 100%; display: block; }
   font-size: var(--text-caption);
   font-weight: 700;
 }
+/* ---------- Map picker, added on Day 11 ---------- */
+.map-picker { display: flex; flex-direction: column; gap: var(--space-2); }
+.map-picker-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+
+.map-box {
+  height: 260px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  z-index: 0; /* keeps the map under the sticky header and dialogs */
+}
+
+.map-box-invalid { border-color: var(--clay); }
+.map-pin { background: none; border: none; }
+
+.map-manual summary { cursor: pointer; font-size: var(--text-label); font-weight: 600; color: var(--leaf-text); }
+.map-manual .form-row { margin-top: var(--space-2); }
+button.back-button { padding: 0; cursor: pointer; font: inherit; }
+.map-place { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-small); font-weight: 600; color: var(--forest); }
