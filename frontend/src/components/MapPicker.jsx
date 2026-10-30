@@ -1,14 +1,17 @@
 /**
  * Pick a point on a map of Sri Lanka: tap the map or drag the pin, or use the device's location.
  * Coordinates can still be typed by hand (keyboard users, or people who know them).
+ * After the user places the pin, the place's address is looked up and shown (and passed to onPlaceFound).
  * Map tiles: OpenStreetMap, shown with the required attribution.
  * @author Ashmi Hettige
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import useToast from '../hooks/useToast';
+import { MapPinIcon } from './Icons';
+import { describePoint } from '../utils/geocode';
 
 const SRI_LANKA_CENTRE = [7.87, 80.77];
 const SRI_LANKA_BOUNDS = [[5.7, 79.3], [10.1, 82.1]];
@@ -43,16 +46,35 @@ function hasNumber(value) {
   return value !== '' && value !== null && value !== undefined && !Number.isNaN(Number(value));
 }
 
-export default function MapPicker({ id, label, lat, lng, onChange, error, focus, fallbackCentre, hint }) {
+export default function MapPicker({
+  id, label, lat, lng, onChange, onPlaceFound, error, focus, fallbackCentre, hint,
+}) {
   const showToast = useToast();
   const [flyTarget, setFlyTarget] = useState(null);
   const [locating, setLocating] = useState(false);
+  // the address found for the pin the user placed: { key: "lat,lng", label }
+  const [place, setPlace] = useState(null);
+  const lookupCount = useRef(0);
 
   const position = hasNumber(lat) && hasNumber(lng) ? [Number(lat), Number(lng)] : null;
 
   function pick(newLat, newLng) {
-    onChange(newLat.toFixed(5), newLng.toFixed(5));
+    const latText = newLat.toFixed(5);
+    const lngText = newLng.toFixed(5);
+    onChange(latText, lngText);
+
+    // look up the address; only the newest lookup counts if the pin moves again quickly
+    const lookup = ++lookupCount.current;
+    describePoint(latText, lngText).then((found) => {
+      if (lookup !== lookupCount.current || !found) return;
+      setPlace({ key: `${latText},${lngText}`, label: found.label });
+      if (onPlaceFound) onPlaceFound(found);
+    });
   }
+
+  const placeLabel = place && position && place.key === `${Number(lat).toFixed(5)},${Number(lng).toFixed(5)}`
+    ? place.label
+    : null;
 
   function locateMe() {
     if (!navigator.geolocation) {
@@ -113,6 +135,7 @@ export default function MapPicker({ id, label, lat, lng, onChange, error, focus,
         )}
       </MapContainer>
 
+      {placeLabel && <p className="map-place"><MapPinIcon size={15} /> {placeLabel}</p>}
       <p className={error ? 'field-error' : 'field-hint'} id={`${id}-help`}>
         {error || (position
           ? `Pin at ${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}. Drag the pin or tap the map to move it.`
