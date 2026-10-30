@@ -1,0 +1,312 @@
+/* Marketplace and listing detail pages. Author: Ashmi Hettige */
+.market-page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 20px var(--space-5) var(--space-7);
+}
+
+/* ---------- Banner ---------- */
+.market-banner {
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-lg);
+  color: var(--white);
+}
+
+.market-banner img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+}
+
+.market-banner-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(19, 63, 36, 0.92) 0%, rgba(19, 63, 36, 0.7) 45%, rgba(19, 63, 36, 0.05) 100%);
+}
+
+.market-banner-content {
+  position: relative;
+  padding: var(--space-6) 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.banner-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.banner-chips span {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(254, 254, 254, 0.16);
+  border: 1px solid rgba(254, 254, 254, 0.3);
+  font-size: var(--text-label);
+  font-weight: 600;
+}
+
+.banner-chips .chip-lime { background: var(--lime); border-color: var(--lime); color: var(--forest-ink); font-weight: 700; }
+
+/* ---------- Filters and results ---------- */
+.market-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+}
+
+.filters {
+  flex: 1 1 250px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(24, 48, 22, 0.06);
+}
+
+.filters-head { display: flex; align-items: center; justify-content: space-between; }
+.filters-head h2 { font-size: 19px; }
+
+.link-button {
+  min-height: 44px;
+  border: none;
+  background: none;
+  color: var(--leaf-text);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.filter-group legend,
+.filter-label {
+  margin-bottom: 4px;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.filter-chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(24, 48, 22, 0.2);
+  background: var(--white);
+  color: var(--forest-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chip.on { background: var(--lime); border-color: var(--lime); }
+
+.crop-list { display: flex; flex-direction: column; gap: 10px; }
+
+.check-row { display: flex; align-items: center; gap: 10px; font-size: 15px; cursor: pointer; }
+.check-row input { width: 18px; height: 18px; accent-color: var(--forest); }
+
+.filter-select select,
+.price-row input,
+.sort-select select {
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(24, 48, 22, 0.2);
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--forest-ink);
+}
+
+.price-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.price-row label { display: flex; flex-direction: column; gap: 4px; font-size: var(--text-caption); color: var(--muted); }
+.price-row input { min-height: 40px; width: 100%; }
+
+.results {
+  flex: 999 1 600px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  min-height: 44px;
+}
+
+.results-bar strong { color: var(--forest-ink); }
+
+.sort-select { display: flex; align-items: center; gap: 10px; font-size: var(--text-small); font-weight: 600; }
+
+/* ---------- Listing cards ---------- */
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  transition: opacity 0.15s;
+}
+
+.listing-grid.is-loading { opacity: 0.5; }
+
+.listing-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(24, 48, 22, 0.07);
+}
+
+.listing-photo { position: relative; display: block; height: 160px; }
+.listing-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.photo-badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  box-shadow: 0 2px 6px rgba(24, 48, 22, 0.18);
+}
+
+/* badges on photos need solid colours to stay readable */
+.photo-badge.badge-fresh { background: var(--white); color: var(--forest-ink); }
+.photo-badge.badge-soon { background: var(--wheat); color: var(--forest-ink); }
+.photo-badge.badge-urgent { background: var(--clay); color: var(--white); }
+
+.listing-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 14px;
+}
+
+.listing-title { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.listing-title h3 { font-size: var(--text-h3); }
+.listing-title h3 a { color: var(--forest-ink); }
+.listing-title h3 a:hover { color: var(--leaf-text); }
+.listing-title span { font-size: var(--text-caption); font-weight: 600; color: var(--muted); }
+
+.listing-farm { font-size: var(--text-label); color: var(--muted); }
+
+.listing-price {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: var(--text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.listing-price .price {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.listing-price small { font-size: var(--text-label); font-weight: 500; color: var(--muted); }
+
+/* ---------- Listing detail ---------- */
+.detail-back { margin-bottom: var(--space-4); }
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(24, 48, 22, 0.07);
+}
+
+.detail-photo { position: relative; border-radius: var(--radius-md); overflow: hidden; min-height: 320px; }
+.detail-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.detail-info { display: flex; flex-direction: column; gap: var(--space-4); }
+.detail-info h1 { font-size: var(--text-h1); }
+
+.detail-price {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.detail-price small { font-size: var(--text-body); font-weight: 500; color: var(--muted); }
+
+.detail-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.detail-facts div { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--mist); }
+.detail-facts dt { font-size: var(--text-caption); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.detail-facts dd { margin: 2px 0 0; font-weight: 600; }
+
+@media (max-width: 760px) {
+  .market-page { padding: var(--space-4) var(--space-4) var(--space-6); }
+  .market-banner-content { padding: var(--space-5); }
+  .filters { max-width: none; }
+  .crop-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail { grid-template-columns: 1fr; padding: var(--space-4); }
+  .detail-photo { min-height: 220px; }
+}
+
+
+/* "How many kg?" box on the listing detail page */
+.order-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+}
+
+.order-box-note { color: var(--muted); background: var(--mist); font-weight: 600; }
+.order-box-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
+
+.quick-amounts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.order-row { display: flex; gap: var(--space-3); }
+.order-row .input { flex: 1; min-width: 0; }
+
+.in-cart-note {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: #e8f3d6;
+  color: var(--leaf-text);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
