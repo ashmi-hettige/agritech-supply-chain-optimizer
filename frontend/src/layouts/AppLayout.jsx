@@ -1,6 +1,6 @@
 /**
  * Layout for logged-in pages: dark sidebar with role-based links, page content on the right.
- * The logo and the "home page" link go back to the public landing page.
+ * The logo and the "Home page" link (top right) go back to the public landing page.
  * @author Ashmi Hettige
  */
 import { useEffect, useState } from 'react';
@@ -113,14 +113,16 @@ export default function AppLayout() {
             </button>
           </div>
 
-          <Link to="/" className="sidebar-home">
-            <ArrowLeftIcon size={16} /> GoviRoute home page
-          </Link>
           <p className="sidebar-copy">© 2026 GoviRoute. All rights reserved.</p>
         </div>
       </aside>
 
       <main className="app-main">
+        <div className="app-topbar">
+          <Link to="/" className="home-link">
+            <ArrowLeftIcon size={16} /> Home page
+          </Link>
+        </div>
         <Outlet />
       </main>
     </div>

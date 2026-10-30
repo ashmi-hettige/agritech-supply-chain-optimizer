@@ -114,19 +114,6 @@
 
 .logout-button:hover { background: rgba(254, 254, 254, 0.18); }
 
-.sidebar-home {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 36px;
-  padding: 0 var(--space-1);
-  color: rgba(254, 254, 254, 0.8);
-  font-size: var(--text-small);
-  font-weight: 600;
-}
-
-.sidebar-home:hover { color: var(--lime); }
-
 /* one line on every profile */
 .sidebar-copy {
   padding: var(--space-3) 0 0;
@@ -140,8 +127,27 @@
 .app-main {
   flex: 1;
   min-width: 0;
-  padding: 28px var(--space-6) 40px;
+  padding: 20px var(--space-6) 40px;
 }
+
+/* "← Home page" in the top right corner of every logged-in page */
+.app-topbar { display: flex; justify-content: flex-end; margin-bottom: var(--space-2); }
+
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--forest);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.home-link:hover { border-color: var(--lime); background: var(--lime); color: var(--forest-ink); }
 
 /* Phones and small tablets: the sidebar becomes a top bar with a menu button */
 @media (max-width: 900px) {
