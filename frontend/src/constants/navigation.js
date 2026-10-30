@@ -20,12 +20,15 @@ export const NAV_LINKS = {
   ],
   TRANSPORTER: [
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/marketplace', label: 'Marketplace' },
+    { to: '/transporter/trips', label: 'My trips' },
+    { to: '/transporter/vehicles', label: 'My vehicles' },
     { to: '/prices', label: 'Market prices' },
+    { to: '/marketplace', label: 'Marketplace' },
   ],
   ADMIN: [
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/admin/prices', label: 'Daily prices' },
+    { to: '/admin/trips', label: 'Trip planner' },
     { to: '/admin/users', label: 'Users' },
     { to: '/admin/crops', label: 'Crops' },
     { to: '/admin/centres', label: 'Economic centres' },
@@ -49,6 +52,7 @@ export const QUICK_ACTIONS = {
     { to: '/orders', title: 'My orders', text: 'Follow your orders and cancel ones not yet confirmed.' },
   ],
   TRANSPORTER: [
-    { to: '/marketplace', title: 'See the marketplace', text: 'What farmers are selling right now.' },
+    { to: '/transporter/trips', title: 'My trips', text: 'Your delivery stops in driving order.' },
+    { to: '/transporter/vehicles', title: 'My vehicles', text: 'Add the lorries that can take trips.' },
   ],
 };

@@ -1,13 +1,13 @@
 /**
  * Layout for logged-in pages: dark sidebar with role-based links, page content on the right.
+ * The logo and the "home page" link go back to the public landing page.
  * @author Ashmi Hettige
  */
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import Logo from '../components/Logo';
-import SidebarPrices from '../components/SidebarPrices';
-import { LogoutIcon } from '../components/Icons';
+import { ArrowLeftIcon, LogoutIcon } from '../components/Icons';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
 import { NAV_LINKS, ROLE_LABELS } from '../constants/navigation';
@@ -67,7 +67,7 @@ export default function AppLayout() {
     <div className="app-shell">
       <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-top">
-          <Link to="/dashboard" aria-label="GoviRoute dashboard" className="sidebar-logo">
+          <Link to="/" aria-label="GoviRoute home page" className="sidebar-logo">
             <Logo size={34} />
           </Link>
           <button
@@ -99,8 +99,6 @@ export default function AppLayout() {
         </nav>
 
         <div className="sidebar-bottom">
-          {user.role === 'FARMER' && <SidebarPrices />}
-
           <div className="sidebar-user">
             <span className="avatar" aria-hidden="true">{initials(user.fullName)}</span>
             <div className="sidebar-user-text">
@@ -115,6 +113,9 @@ export default function AppLayout() {
             </button>
           </div>
 
+          <Link to="/" className="sidebar-home">
+            <ArrowLeftIcon size={16} /> GoviRoute home page
+          </Link>
           <p className="sidebar-copy">© 2026 GoviRoute. All rights reserved.</p>
         </div>
       </aside>

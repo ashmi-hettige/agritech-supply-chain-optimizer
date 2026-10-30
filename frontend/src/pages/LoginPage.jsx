@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import BackButton from '../components/BackButton';
 import FormField from '../components/FormField';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
@@ -54,9 +55,12 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-form-side">
-        <Link to="/" aria-label="GoviRoute home">
-          <Logo size={36} onDark={false} />
-        </Link>
+        <div className="auth-top">
+          <BackButton label="Go back" />
+          <Link to="/" aria-label="GoviRoute home">
+            <Logo size={36} onDark={false} />
+          </Link>
+        </div>
 
         <div className="auth-form-wrap">
           <div className="auth-heading">

@@ -1,0 +1,82 @@
+/* Vehicles, trips and the trip planner. Author: Ashmi Hettige */
+.table-empty { padding: var(--space-5); }
+
+.trip-list { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.trip-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid rgba(24, 48, 22, 0.08);
+}
+
+.trip-head { display: flex; align-items: flex-start; gap: var(--space-3); }
+.trip-head > div { flex: 1; min-width: 0; }
+.trip-head h2 { font-size: var(--text-h3); }
+.trip-head p { font-size: var(--text-small); margin-top: 2px; }
+
+.trip-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--mist);
+  color: var(--forest);
+}
+
+.trip-planned { color: #8a6a12; }
+.trip-in-progress { color: var(--leaf-text); }
+.trip-completed { color: var(--forest); }
+
+.trip-load-text { display: flex; justify-content: space-between; font-size: var(--text-small); font-variant-numeric: tabular-nums; }
+.trip-load-track { height: 10px; margin-top: 6px; border-radius: 5px; background: var(--mist); overflow: hidden; }
+.trip-load-fill { height: 100%; border-radius: 5px; background: var(--lime); }
+
+.trip-stops { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+
+.trip-stops li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--mist);
+}
+
+.stop-number {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--white);
+  font-weight: 700;
+  font-size: var(--text-label);
+}
+
+.stop-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.stop-body span { font-size: var(--text-label); color: var(--muted); }
+.stop-line { display: inline-flex; align-items: center; gap: 6px; }
+.stop-status { font-size: var(--text-label); font-weight: 700; color: var(--leaf-text); white-space: nowrap; }
+
+/* admin planner */
+.planner-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-5); margin-bottom: var(--space-4); }
+.planner-bar .field { min-width: 180px; }
+.planner-waiting { display: flex; flex-direction: column; }
+.planner-waiting strong { font-family: var(--font-heading); font-size: var(--text-h2); color: var(--forest); line-height: 1.1; }
+.planner-how { flex-basis: 100%; }
+.planner-notice { margin-bottom: var(--space-4); background: #e8f3d6; color: var(--leaf-text); border: 1px solid #cfe3ad; }
+
+@media (max-width: 560px) {
+  .trip-stops li { flex-wrap: wrap; }
+  .stop-status { margin-left: 40px; }
+}

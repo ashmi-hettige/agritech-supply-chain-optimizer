@@ -131,3 +131,6 @@
 @media (max-width: 480px) {
   .role-options { grid-template-columns: 1fr; }
 }
+
+/* back arrow in front of the logo */
+.auth-top { display: flex; align-items: center; gap: var(--space-3); }
