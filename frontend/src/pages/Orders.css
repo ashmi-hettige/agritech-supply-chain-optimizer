@@ -29,6 +29,7 @@
 
 .cart-group-head h2 { font-size: var(--text-h3); }
 .cart-group-head span { font-size: var(--text-small); }
+.farm-order-button { margin-left: auto; }
 
 .cart-row {
   display: grid;

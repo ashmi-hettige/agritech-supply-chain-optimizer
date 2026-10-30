@@ -3,15 +3,17 @@
  * /farmer/listings/new creates; /farmer/listings/:id/edit updates.
  * @author Ashmi Hettige
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api, { getErrorMessage, getFieldErrors } from '../api/client';
 import BackButton from '../components/BackButton';
 import FormField from '../components/FormField';
 import FreshnessBadge from '../components/FreshnessBadge';
+import MapPicker from '../components/MapPicker';
+import NewCropForm from '../components/NewCropForm';
 import useAuth from '../hooks/useAuth';
 import useToast from '../hooks/useToast';
-import { DISTRICTS } from '../constants/districts';
+import { DISTRICTS, DISTRICT_CENTRES } from '../constants/districts';
 import { formatDate, formatKg, formatPrice, todayIso } from '../utils/format';
 import { validateListing } from '../utils/validation';
 import './Farmer.css';
@@ -96,7 +98,15 @@ function ListingForm({ crops, initial, listingId }) {
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const crop = crops.find((item) => String(item.id) === String(form.cropId));
+  const [cropList, setCropList] = useState(crops);
+  const [addingCrop, setAddingCrop] = useState(false);
+
+  const crop = cropList.find((item) => String(item.id) === String(form.cropId));
+  // the map moves to the chosen district until a pickup pin is dropped
+  const pickupFocus = useMemo(
+    () => (form.pickupLat === '' ? DISTRICT_CENTRES[form.district] ?? null : null),
+    [form.district, form.pickupLat],
+  );
   const today = todayIso();
 
   function handleChange(event) {
@@ -105,19 +115,16 @@ function ListingForm({ crops, initial, listingId }) {
     setErrors((current) => ({ ...current, [name]: undefined }));
   }
 
-  function fillMyLocation() {
-    if (!navigator.geolocation) {
-      showToast('Your browser cannot share its location. Please type it in.', 'error');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => setForm((current) => ({
-        ...current,
-        pickupLat: position.coords.latitude.toFixed(5),
-        pickupLng: position.coords.longitude.toFixed(5),
-      })),
-      () => showToast('Location permission was denied. Please type it in.', 'error'),
-    );
+  function setPickupPoint(pickupLat, pickupLng) {
+    setForm((current) => ({ ...current, pickupLat, pickupLng }));
+    setErrors((current) => ({ ...current, pickupLat: undefined, pickupLng: undefined }));
+  }
+
+  function cropAdded(newCrop) {
+    setCropList((current) => [...current, newCrop].sort((a, b) => a.name.localeCompare(b.name)));
+    setForm((current) => ({ ...current, cropId: String(newCrop.id) }));
+    setErrors((current) => ({ ...current, cropId: undefined }));
+    setAddingCrop(false);
   }
 
   async function handleSubmit(event) {
@@ -163,18 +170,27 @@ function ListingForm({ crops, initial, listingId }) {
         {serverError && <div className="alert alert-error" role="alert">{serverError}</div>}
 
         <div className="form-row">
-          <FormField id="cropId" label="Crop" as="select" value={form.cropId} onChange={handleChange}
-            error={errors.cropId} disabled={isEdit}
-            hint={isEdit ? 'The crop cannot be changed. Create a new listing for a different crop.' : undefined}>
-            <option value="">Choose a crop</option>
-            {crops.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </FormField>
+          <div className="crop-field">
+            <FormField id="cropId" label="Crop" as="select" value={form.cropId} onChange={handleChange}
+              error={errors.cropId} disabled={isEdit}
+              hint={isEdit ? 'The crop cannot be changed. Create a new listing for a different crop.' : undefined}>
+              <option value="">Choose a crop</option>
+              {cropList.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </FormField>
+            {!isEdit && !addingCrop && (
+              <button type="button" className="link-button add-crop-link" onClick={() => setAddingCrop(true)}>
+                Crop not in the list? Add it
+              </button>
+            )}
+          </div>
           <FormField id="grade" label="Grade" as="select" value={form.grade} onChange={handleChange} error={errors.grade}>
             <option value="A">Grade A</option>
             <option value="B">Grade B</option>
             <option value="C">Grade C</option>
           </FormField>
         </div>
+
+        {addingCrop && <NewCropForm onAdded={cropAdded} onCancel={() => setAddingCrop(false)} />}
 
         <div className="form-row">
           <FormField id="quantityKg" label="Quantity (kg)" inputMode="decimal" placeholder="500"
@@ -192,18 +208,17 @@ function ListingForm({ crops, initial, listingId }) {
           </FormField>
         </div>
 
-        <div className="farm-box">
-          <div className="location-row">
-            <span className="field-label">Pickup location</span>
-            <button type="button" className="btn btn-outline btn-small" onClick={fillMyLocation}>Use my current location</button>
-          </div>
-          <div className="form-row">
-            <FormField id="pickupLat" label="Latitude" inputMode="decimal" placeholder="7.85"
-              value={form.pickupLat} onChange={handleChange} error={errors.pickupLat} />
-            <FormField id="pickupLng" label="Longitude" inputMode="decimal" placeholder="80.65"
-              value={form.pickupLng} onChange={handleChange} error={errors.pickupLng} />
-          </div>
-        </div>
+        <MapPicker
+          id="pickup-location"
+          label="Pickup location"
+          lat={form.pickupLat}
+          lng={form.pickupLng}
+          onChange={setPickupPoint}
+          error={errors.pickupLat || errors.pickupLng}
+          focus={pickupFocus}
+          fallbackCentre={DISTRICT_CENTRES[form.district]}
+          hint="Tap where the lorry should collect the produce."
+        />
 
         <div className="form-actions">
           <Link to="/farmer/listings" className="btn btn-outline">Cancel</Link>
