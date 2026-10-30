@@ -2,7 +2,7 @@
  * Sign-up form. Farmers also give their farm name and location.
  * @author Ashmi Hettige
  */
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
 import BackButton from '../components/BackButton';
@@ -56,16 +56,25 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const isFarmer = form.role === 'FARMER';
-  // the map moves to the chosen district until the farmer drops a pin
-  const farmFocus = useMemo(
-    () => (form.farmLatitude === '' ? DISTRICT_CENTRES[form.district] ?? null : null),
-    [form.district, form.farmLatitude],
-  );
+  // where the map should fly to: the district's centre when the district changes
+  const [farmFocus, setFarmFocus] = useState(null);
 
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
+
+    // a new district moves the farm pin to that district's centre; the farmer then fine-tunes it
+    if (name === 'district' && DISTRICT_CENTRES[value] && isFarmer) {
+      const [lat, lng] = DISTRICT_CENTRES[value];
+      setFarmPoint(lat.toFixed(5), lng.toFixed(5));
+      setFarmFocus([lat, lng]);
+    }
+  }
+
+  // the pin's address names a district: fill in the District box to match
+  function farmPlaceFound(place) {
+    if (place.district) setForm((current) => ({ ...current, district: place.district }));
   }
 
   function setFarmPoint(farmLatitude, farmLongitude) {
@@ -180,6 +189,7 @@ export default function RegisterPage() {
                   lng={form.farmLongitude}
                   onChange={setFarmPoint}
                   error={errors.farmLatitude || errors.farmLongitude}
+                  onPlaceFound={farmPlaceFound}
                   focus={farmFocus}
                   fallbackCentre={DISTRICT_CENTRES[form.district]}
                   hint="Tap your farm on the map, or use your current location if you are at the farm."

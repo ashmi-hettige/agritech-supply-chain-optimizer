@@ -2,7 +2,7 @@
  * One delivery trip: vehicle, load against capacity, distance and the stops in driving order.
  * @author Ashmi Hettige
  */
-import { ORDER_STATUS_LABELS } from '../constants/orders';
+import { ORDER_STATUS_LABELS, SLOT_LABELS } from '../constants/orders';
 import { formatDate, formatKg } from '../utils/format';
 import { MapPinIcon, PhoneIcon, TruckIcon } from './Icons';
 
@@ -18,7 +18,7 @@ export default function TripCard({ trip, showTransporter, children }) {
         <div>
           <h2>Trip #{trip.id} · {trip.plateNo}</h2>
           <p className="text-muted">
-            {formatDate(trip.tripDate)} · {trip.vehicleType}{trip.refrigerated ? ' (refrigerated)' : ''}
+            {formatDate(trip.tripDate)}{trip.slot ? `, ${SLOT_LABELS[trip.slot].split(' (')[0].toLowerCase()}` : ''} · {trip.vehicleType}{trip.refrigerated ? ' (refrigerated)' : ''}
             {showTransporter ? ` · ${trip.transporterName}` : ''}
           </p>
         </div>

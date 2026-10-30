@@ -12,7 +12,6 @@ import './Admin.css';
 
 const SHORTCUTS = [
   { to: '/admin/prices', title: 'Daily prices', text: 'Enter today’s prices from each economic centre.' },
-  { to: '/admin/trips', title: 'Trip planner', text: 'Load confirmed orders onto vehicles and plan routes.' },
   { to: '/admin/users', title: 'Users', text: 'Find accounts and disable ones that break the rules.' },
   { to: '/admin/crops', title: 'Crops', text: 'Add crops and set how long each one keeps.' },
   { to: '/admin/centres', title: 'Economic centres', text: 'Add centres and their map location.' },

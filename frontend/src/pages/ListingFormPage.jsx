@@ -3,7 +3,7 @@
  * /farmer/listings/new creates; /farmer/listings/:id/edit updates.
  * @author Ashmi Hettige
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api, { getErrorMessage, getFieldErrors } from '../api/client';
 import BackButton from '../components/BackButton';
@@ -102,17 +102,26 @@ function ListingForm({ crops, initial, listingId }) {
   const [addingCrop, setAddingCrop] = useState(false);
 
   const crop = cropList.find((item) => String(item.id) === String(form.cropId));
-  // the map moves to the chosen district until a pickup pin is dropped
-  const pickupFocus = useMemo(
-    () => (form.pickupLat === '' ? DISTRICT_CENTRES[form.district] ?? null : null),
-    [form.district, form.pickupLat],
-  );
+  // where the map should fly to: the district's centre when the district changes
+  const [pickupFocus, setPickupFocus] = useState(null);
   const today = todayIso();
 
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
+
+    // a new district moves the pickup pin to that district's centre
+    if (name === 'district' && DISTRICT_CENTRES[value]) {
+      const [lat, lng] = DISTRICT_CENTRES[value];
+      setPickupPoint(lat.toFixed(5), lng.toFixed(5));
+      setPickupFocus([lat, lng]);
+    }
+  }
+
+  // the pin's address names a district: fill in the District box to match
+  function pickupPlaceFound(place) {
+    if (place.district) setForm((current) => ({ ...current, district: place.district }));
   }
 
   function setPickupPoint(pickupLat, pickupLng) {
@@ -215,6 +224,7 @@ function ListingForm({ crops, initial, listingId }) {
           lng={form.pickupLng}
           onChange={setPickupPoint}
           error={errors.pickupLat || errors.pickupLng}
+          onPlaceFound={pickupPlaceFound}
           focus={pickupFocus}
           fallbackCentre={DISTRICT_CENTRES[form.district]}
           hint="Tap where the lorry should collect the produce."

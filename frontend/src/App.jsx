@@ -23,8 +23,8 @@ import AdminCropsPage from './pages/admin/AdminCropsPage';
 import AdminCentresPage from './pages/admin/AdminCentresPage';
 import AdminPricesPage from './pages/admin/AdminPricesPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
-import TripPlannerPage from './pages/admin/TripPlannerPage';
 import MyTripsPage from './pages/transporter/MyTripsPage';
+import TransportRequestsPage from './pages/transporter/TransportRequestsPage';
 import VehiclesPage from './pages/transporter/VehiclesPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -65,10 +65,10 @@ export default function App() {
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/crops" element={<AdminCropsPage />} />
             <Route path="/admin/centres" element={<AdminCentresPage />} />
-            <Route path="/admin/trips" element={<TripPlannerPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={['TRANSPORTER']} />}>
+            <Route path="/transporter/requests" element={<TransportRequestsPage />} />
             <Route path="/transporter/trips" element={<MyTripsPage />} />
             <Route path="/transporter/vehicles" element={<VehiclesPage />} />
           </Route>

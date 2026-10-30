@@ -4,7 +4,7 @@
  * The buyer can order everything at once, or one farm at a time.
  * @author Ashmi Hettige
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api, { getErrorMessage, getFieldErrors } from '../api/client';
 import BackButton from '../components/BackButton';
@@ -16,6 +16,7 @@ import useToast from '../hooks/useToast';
 import { DISTRICTS, DISTRICT_CENTRES } from '../constants/districts';
 import { ORDERS_CHANGED_EVENT } from '../constants/orders';
 import { formatKg, formatPrice } from '../utils/format';
+import { findAddress } from '../utils/geocode';
 import { validateCheckout, validateOrderQuantity } from '../utils/validation';
 import './Orders.css';
 
@@ -43,6 +44,9 @@ export default function CartPage() {
   // delivery point; until the buyer drops a pin, the district's town centre is used
   const [point, setPoint] = useState({ lat: '', lng: '' });
   const [submittingFarm, setSubmittingFarm] = useState(null);
+  // where the map should fly to, and whether the address was typed (look it up) or filled from the map
+  const [deliveryFocus, setDeliveryFocus] = useState(null);
+  const [addressSource, setAddressSource] = useState('typed');
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -71,12 +75,50 @@ export default function CartPage() {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
+    setAddressSource('typed');
+
+    // a new district moves the pin to its town centre straight away; the address search refines it
+    if (name === 'district' && DISTRICT_CENTRES[value]) {
+      const [lat, lng] = DISTRICT_CENTRES[value];
+      setDeliveryPoint(lat.toFixed(5), lng.toFixed(5));
+      setDeliveryFocus([lat, lng]);
+    }
   }
 
   function setDeliveryPoint(lat, lng) {
     setPoint({ lat, lng });
     setErrors((current) => ({ ...current, deliveryLat: undefined, deliveryLng: undefined }));
   }
+
+  // pin moved on the map: write its address (and district) into the form
+  function deliveryPlaceFound(place) {
+    setAddressSource('map');
+    setForm((current) => ({
+      ...current,
+      deliveryAddress: place.label,
+      district: place.district || current.district,
+    }));
+    setErrors((current) => ({ ...current, deliveryAddress: undefined, district: undefined }));
+  }
+
+  // address typed: when typing stops for a moment, find it and move the pin there
+  useEffect(() => {
+    const text = form.deliveryAddress.trim();
+    if (addressSource !== 'typed' || text.length < 5) {
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const found = await findAddress([text, form.district, 'Sri Lanka'].filter(Boolean).join(', '));
+      if (cancelled || !found) return;
+      setPoint({ lat: found.lat.toFixed(5), lng: found.lng.toFixed(5) });
+      setDeliveryFocus([found.lat, found.lng]);
+    }, 900);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [form.deliveryAddress, form.district, addressSource]);
 
   // farmerId: order only that farm's items; null: order the whole cart
   async function placeOrder(farmerId) {
@@ -127,12 +169,6 @@ export default function CartPage() {
       setSubmittingFarm(null);
     }
   }
-
-  // the map follows the district until the buyer drops a pin
-  const deliveryFocus = useMemo(
-    () => (point.lat === '' ? DISTRICT_CENTRES[form.district] ?? null : null),
-    [form.district, point.lat],
-  );
 
   return (
     <div className="market-page">
@@ -224,10 +260,11 @@ export default function CartPage() {
                 lat={point.lat}
                 lng={point.lng}
                 onChange={setDeliveryPoint}
+                onPlaceFound={deliveryPlaceFound}
                 error={errors.deliveryLat || errors.deliveryLng}
                 focus={deliveryFocus}
                 fallbackCentre={DISTRICT_CENTRES[form.district]}
-                hint={`No pin yet: we use ${form.district || 'the district'} town centre. Tap the map for your exact gate.`}
+                hint="Type the address or choose the district and the pin moves there. Or tap the map, and the address is filled in for you."
               />
 
               <dl className="checkout-summary">

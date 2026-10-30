@@ -1,13 +1,16 @@
 /**
- * Farmer's incoming orders in tabs: new orders to confirm or reject, confirmed ones to deliver.
+ * Farmer's incoming orders in tabs: new orders to confirm or reject, confirmed ones to deliver
+ * (book a transporter, or mark as delivered when the farmer delivers it).
  * @author Ashmi Hettige
  */
 import { useEffect, useState } from 'react';
 import api, { getErrorMessage } from '../api/client';
 import OrderActions from '../components/OrderActions';
 import OrderCard from '../components/OrderCard';
+import TransportPanel from '../components/TransportPanel';
 import { ORDER_STATUS_LABELS } from '../constants/orders';
 import './Orders.css';
+import './transporter/Transport.css';
 
 const FARMER_LABELS = { ...ORDER_STATUS_LABELS, PLACED: 'New order' };
 
@@ -21,18 +24,17 @@ const TABS = [
 export default function IncomingOrdersPage() {
   const [tab, setTab] = useState('NEW');
   const [reloadCount, setReloadCount] = useState(0);
-  const [result, setResult] = useState({ count: -1, orders: [], error: '' });
+  const [result, setResult] = useState({ count: -1, orders: [], requests: [], error: '' });
   const loading = result.count !== reloadCount;
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .get('/orders/incoming')
-      .then((response) => {
-        if (!cancelled) setResult({ count: reloadCount, orders: response.data, error: '' });
+    Promise.all([api.get('/orders/incoming'), api.get('/delivery/requests')])
+      .then(([orders, requests]) => {
+        if (!cancelled) setResult({ count: reloadCount, orders: orders.data, requests: requests.data, error: '' });
       })
       .catch((error) => {
-        if (!cancelled) setResult({ count: reloadCount, orders: [], error: getErrorMessage(error) });
+        if (!cancelled) setResult({ count: reloadCount, orders: [], requests: [], error: getErrorMessage(error) });
       });
     return () => {
       cancelled = true;
@@ -41,6 +43,8 @@ export default function IncomingOrdersPage() {
 
   const reload = () => setReloadCount((count) => count + 1);
   const { orders } = result;
+  // requests come newest first, so the first one found is the latest for that order
+  const latestRequest = (orderId) => result.requests.find((request) => request.orderId === orderId);
   const activeTab = TABS.find((item) => item.key === tab);
   const shown = orders.filter((order) => activeTab.statuses.includes(order.status));
 
@@ -79,6 +83,9 @@ export default function IncomingOrdersPage() {
       <div className="order-list">
         {shown.map((order) => (
           <OrderCard key={order.id} order={order} viewer="FARMER" labels={FARMER_LABELS}>
+            {order.status === 'CONFIRMED' && (
+              <TransportPanel order={order} request={latestRequest(order.id)} onChanged={reload} />
+            )}
             <OrderActions order={order} viewer="FARMER" onChanged={reload} />
           </OrderCard>
         ))}

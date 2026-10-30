@@ -1,4 +1,4 @@
-/* Vehicles, trips and the trip planner. Author: Ashmi Hettige */
+/* Vehicles, trips, transport requests and booking. Author: Ashmi Hettige */
 .table-empty { padding: var(--space-5); }
 
 .trip-list { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -68,15 +68,63 @@
 .stop-line { display: inline-flex; align-items: center; gap: 6px; }
 .stop-status { font-size: var(--text-label); font-weight: 700; color: var(--leaf-text); white-space: nowrap; }
 
-/* admin planner */
-.planner-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-5); margin-bottom: var(--space-4); }
-.planner-bar .field { min-width: 180px; }
-.planner-waiting { display: flex; flex-direction: column; }
-.planner-waiting strong { font-family: var(--font-heading); font-size: var(--text-h2); color: var(--forest); line-height: 1.1; }
-.planner-how { flex-basis: 100%; }
-.planner-notice { margin-bottom: var(--space-4); background: #e8f3d6; color: var(--leaf-text); border: 1px solid #cfe3ad; }
+/* transporter Requests page */
+.request-list { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-6); }
 
-@media (max-width: 560px) {
-  .trip-stops li { flex-wrap: wrap; }
-  .stop-status { margin-left: 40px; }
+.request-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: 14px;
+  background: var(--white);
+  border: 1px solid rgba(24, 48, 22, 0.08);
 }
+
+.request-text { flex: 1 1 320px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.request-text strong { font-size: 15px; }
+.request-text span { font-size: var(--text-label); color: var(--muted); }
+.request-when { font-weight: 700; color: var(--forest) !important; }
+
+.section-title { font-size: var(--text-h3); margin: var(--space-2) 0 var(--space-3); }
+
+.suggestion { display: flex; flex-direction: column; gap: var(--space-3); padding: 20px; border-radius: 16px; background: var(--white); border: 1px solid rgba(24, 48, 22, 0.08); margin-bottom: var(--space-4); }
+.suggestion-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); }
+.suggestion-head span { font-size: var(--text-small); color: var(--muted); }
+
+/* farmer: "Arrange transport" inside an order card */
+.transport-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--mist);
+}
+
+.transport-panel h3 { font-size: 16px; }
+.transport-search { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); }
+.transport-search .field { min-width: 170px; }
+
+.transport-options { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; border: none; }
+
+.transport-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+}
+
+.transport-option:has(input:checked) { border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(154, 197, 64, 0.3); }
+.transport-option input { margin-top: 4px; accent-color: var(--forest); }
+.transport-option div { display: flex; flex-direction: column; gap: 2px; }
+.transport-option span { font-size: var(--text-label); color: var(--muted); }
+.share-tag { align-self: flex-start; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--lime); color: var(--forest-ink) !important; font-weight: 700; }
+
+.transport-waiting { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); font-size: var(--text-small); }
+.transport-declined { font-size: var(--text-small); font-weight: 600; color: var(--clay); }

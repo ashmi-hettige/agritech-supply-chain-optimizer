@@ -549,3 +549,7 @@
   .cta-shade { background: linear-gradient(90deg, rgba(19, 63, 36, 0.95) 0%, rgba(19, 63, 36, 0.85) 70%, rgba(19, 63, 36, 0.6) 100%); }
   .cta-content { padding: var(--space-6) var(--space-5); }
 }
+
+/* social icons now sit under "Contact"; keep their round button look */
+.footer-col .social-links a { color: var(--white); font-weight: 400; }
+.footer-col .social-links a:hover { color: var(--forest-ink); }
